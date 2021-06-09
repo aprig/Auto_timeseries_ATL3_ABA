@@ -1,0 +1,53 @@
+name: eval and publish notebooks
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # everyday at 8am
+
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  run_forecast:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Initialize conda
+        run: bash -c "conda init bash"
+      - name: Run all notebooks with papermill
+        run: |
+          export TAO_FTP_USER=${{ secrets.TAO_FTP_USER }} 
+          export TAO_FTP_PASS=${{ secrets.TAO_FTP_PASS }} 
+          bash -c ". ${HOME}/.bashrc && conda activate notebook && .ci/run_all_notebooks.py --dir . --out ci_out/"
+      - name: Complete listing of data dirs
+        if: ${{ always() }}
+        run: |
+          du -sh *
+      - name: Convert to HTML
+        if: ${{ always() }}
+        run: |
+          bash -c ". ${HOME}/.bashrc && conda activate notebook && cd ci_out/ && jupyter nbconvert --to HTML \*.ipynb"
+      - name: Upload notebook
+        uses: actions/upload-artifact@v1
+        if: ${{ always() }}
+        with:
+          name: ci_out
+          path: ci_out/
+      - name: Prepare pages
+        run: |
+          mkdir -p ./public
+          cp ci_out/*.html ./public/.
+          echo '<meta HTTP-EQUIV="REFRESH" content="0; url=030_plot_forecast_data.html">' > ./public/index.html
+      - name: Deploy pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
