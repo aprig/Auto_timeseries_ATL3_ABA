@@ -1,4 +1,4 @@
-name: eval and publish notebooks
+name: eval and publish notebook
 
 on:
   schedule:
@@ -22,7 +22,7 @@ jobs:
         run: |
           export TAO_FTP_USER=${{ secrets.TAO_FTP_USER }} 
           export TAO_FTP_PASS=${{ secrets.TAO_FTP_PASS }} 
-          bash -c ". ${HOME}/.bashrc && conda activate notebook && .ci/run_all_notebooks.py --dir . --out ci_out/"
+          bash -c ". ${HOME}/.bashrc && conda activate notebook && .ci/run_notebook.py --dir . --out ci_out/"
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir -p ./public
           cp ci_out/*.html ./public/.
-          echo '<meta HTTP-EQUIV="REFRESH" content="0; url=030_plot_forecast_data.html">' > ./public/index.html
+          echo '<meta HTTP-EQUIV="REFRESH" content="0; url=automatic_time_series_SST.html">' > ./public/index.html
       - name: Deploy pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'
