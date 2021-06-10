@@ -22,7 +22,7 @@ jobs:
       - name: initialize conda
         run: bash -c "conda init bash"
       - name: activate env
-        run: bash -c "conda activate py37"
+        run: bash -c "conda init bash && conda activate py37"
       - name: install dependencies
         run: bash -c "conda install -c conda-forge --file requirements.txt"
       - name: install Pydap
