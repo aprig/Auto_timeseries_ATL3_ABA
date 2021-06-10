@@ -16,11 +16,17 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
+      - name: install dependencies
+        run: |
+          pip3 install -r requirements.txt
+          python3 -m ipykernel install --user --name python3
+          sudo chmod -R 777 .
+      
       - name: Initialize conda
         run: bash -c "conda init bash"
       - name: Run all notebooks with papermill
         run: |
-          bash -c ". ${HOME}/.bashrc && conda activate notebook && .ci/run_notebook.py --dir . --out ci_out/"
+          bash -c ".ci/run_notebook.py --dir . --out ci_out/"
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
