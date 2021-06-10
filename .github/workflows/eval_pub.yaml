@@ -16,13 +16,17 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - name: install dependencies
+      - name: create python env
         run: |
           conda create -y --name py37 python=3.7
-          conda init bash
-          conda activate py37
-          conda install -c conda-forge --file requirements.txt
-          pip install Pydap
+      - name: initialize conda
+        run: bash -c "conda init bash"
+      - name: activate env
+        run: bash-c "conda activate py37"
+      - name: install dependencies
+        run: bash -c "conda install -c conda-forge --file requirements.txt"
+      - name: install Pydap
+        run: pip install Pydap
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
