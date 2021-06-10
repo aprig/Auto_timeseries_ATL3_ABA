@@ -15,18 +15,20 @@ jobs:
   run_forecast:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
-      - name: create python env
-        run: |
-          conda create -y --name py37 python=3.7
-      - name: initialize conda
-        run: conda init bash
-      - name: activate env
-        run: conda init bash && conda activate py37
+      
+      - name: Copy Repository Contents
+        uses: actions/checkout@v2
+  
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+  
       - name: install dependencies
-        run: bash -c "conda install -c conda-forge --file requirements.txt"
-      - name: install Pydap
-        run: pip install Pydap
+        run: |
+          pip3 install -r ./requirements.txt
+          python3 -m ipykernel install --user --name python3
+          sudo chmod -R 777 .
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
