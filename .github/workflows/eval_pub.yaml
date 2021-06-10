@@ -19,11 +19,9 @@ jobs:
       - name: install dependencies
         run: |
           conda create -y --name py37 python=3.7
-          conda install --force-reinstall -y -q --name py37 -c conda-forge --file requirements.txt
           conda activate py37
-      - name: Run all notebooks with papermill
-        run: |
-          bash -c ".ci/run_notebook.py"
+          conda install -c conda-forge --file requirements.txt
+          pip install Pydap
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
@@ -31,7 +29,8 @@ jobs:
       - name: Convert to HTML
         if: ${{ always() }}
         run: |
-          bash -c ".jupyter nbconvert --to HTML \*.ipynb"
+          jupyter nbconvert --execute automatic_time_series_SST.ipynb --to html
+
       - name: Upload notebook
         uses: actions/upload-artifact@v1
         if: ${{ always() }}
