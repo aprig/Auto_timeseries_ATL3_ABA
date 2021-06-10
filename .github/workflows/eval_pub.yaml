@@ -51,7 +51,7 @@ jobs:
           echo '<meta HTTP-EQUIV="REFRESH" content="0; url=automatic_time_series_SST.html">' > ./public/index.html
       - name: Deploy pages
         uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
