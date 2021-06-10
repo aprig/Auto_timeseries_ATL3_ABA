@@ -26,7 +26,7 @@ jobs:
         run: bash -c "conda init bash"
       - name: Run all notebooks with papermill
         run: |
-          bash -c ".ci/run_notebook.py --dir . --out ci_out/"
+          bash -c ".ci/run_notebook.py"
       - name: Complete listing of data dirs
         if: ${{ always() }}
         run: |
@@ -34,7 +34,7 @@ jobs:
       - name: Convert to HTML
         if: ${{ always() }}
         run: |
-          bash -c ". ${HOME}/.bashrc && conda activate notebook && cd ci_out/ && jupyter nbconvert --to HTML \*.ipynb"
+          bash -c ".jupyter nbconvert --to HTML \*.ipynb"
       - name: Upload notebook
         uses: actions/upload-artifact@v1
         if: ${{ always() }}
