@@ -20,9 +20,9 @@ jobs:
         run: |
           conda create -y --name py37 python=3.7
       - name: initialize conda
-        run: bash -c "conda init bash"
+        run: conda init bash
       - name: activate env
-        run: bash -c "conda init bash && conda activate py37"
+        run: conda init bash && conda activate py37
       - name: install dependencies
         run: bash -c "conda install -c conda-forge --file requirements.txt"
       - name: install Pydap
