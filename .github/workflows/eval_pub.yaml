@@ -31,7 +31,6 @@ jobs:
       - name: install dependencies
         run: |
           pip3 install -r ./requirements.txt
-          conda install -c scitools cartopy
           python3 -m ipykernel install --user --name python3
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
