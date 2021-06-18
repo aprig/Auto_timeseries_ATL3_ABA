@@ -467,70 +467,70 @@ def plot_anomalies_wk_atl3(ssta_atl3):
     
     
     
-import cartopy.crs as ccrs
-import cartopy    
-import matplotlib.patches as mpatches
-def plot_regions_of_interest():
-    f = plt.figure(figsize=[20,20])
-    ftz=15
-    minlon = -175
-    maxlon = 20
-    minlat = -30
-    maxlat = 30
-    ax = plt.axes(projection=ccrs.PlateCarree())
-    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-    ax.coastlines()
-    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
-    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                      linewidth=2, color='black', alpha=0.5, linestyle='-')
-    gl.xlabels_top = False
-    gl.ylabels_right = False
-    gl.xlabel_style = {'size': 15, 'color': 'black'}
-    gl.ylabel_style = {'size': 15, 'color': 'black'}
-    gl.xlocator = mticker.FixedLocator([-160,-140,-120,-100,-80,-60,-40,-20, 0])
-    gl.ylocator = mticker.FixedLocator([-20, 0,20])
-    ax.coastlines(linewidth=1)
-    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
-
-    ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
-                                        facecolor='blue',
-                                        alpha=0.5,
-                                        edgecolor='black',
-                                        transform=ccrs.PlateCarree()))
-
-    ax.text(-12.5, 0.8, 'ATL3',
-             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-             transform=ccrs.PlateCarree())
-
-    ax.add_patch(mpatches.Rectangle(xy=[8, -20], width=8, height=10,
-                                        facecolor='red',
-                                        edgecolor='black',
-                                        alpha=0.5,
-                                        transform=ccrs.PlateCarree()))
-
-    ax.text(2, -15, 'ABA',
-             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-             transform=ccrs.PlateCarree())
-    
-    ax.add_patch(mpatches.Rectangle(xy=[-170, -5], width=50, height=10,
-                                        facecolor='green',
-                                        edgecolor='black',
-                                        alpha=0.5,
-                                        transform=ccrs.PlateCarree()))
-
-    ax.text(-150, 1, 'NINO3.4',
-             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-             transform=ccrs.PlateCarree())
-    
-    
-    ax.add_patch(mpatches.Rectangle(xy=[-21, 9], width=4, height=5,
-                                        facecolor='orange',
-                                        edgecolor='black',
-                                        alpha=0.5,
-                                        transform=ccrs.PlateCarree()))
-
-    ax.text(-27, 10, 'DNI',
-             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-             transform=ccrs.PlateCarree())
-    
+#import cartopy.crs as ccrs
+#import cartopy    
+#import matplotlib.patches as mpatches
+#def plot_regions_of_interest():
+#    f = plt.figure(figsize=[20,20])
+#    ftz=15
+#    minlon = -175
+#    maxlon = 20
+#    minlat = -30
+#    maxlat = 30
+#    ax = plt.axes(projection=ccrs.PlateCarree())
+#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+#    ax.coastlines()
+#    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
+#    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+#                      linewidth=2, color='black', alpha=0.5, linestyle='-')
+#    gl.xlabels_top = False
+#    gl.ylabels_right = False
+#    gl.xlabel_style = {'size': 15, 'color': 'black'}
+#    gl.ylabel_style = {'size': 15, 'color': 'black'}
+#    gl.xlocator = mticker.FixedLocator([-160,-140,-120,-100,-80,-60,-40,-20, 0])
+#    gl.ylocator = mticker.FixedLocator([-20, 0,20])
+#    ax.coastlines(linewidth=1)
+#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+#    ax.coastlines(resolution='50m', color='black', linewidth=1)
+#
+#    ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
+#                                        facecolor='blue',
+#                                        alpha=0.5,
+#                                        edgecolor='black',
+#                                        transform=ccrs.PlateCarree()))
+#
+#    ax.text(-12.5, 0.8, 'ATL3',
+#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+#             transform=ccrs.PlateCarree())
+#
+#    ax.add_patch(mpatches.Rectangle(xy=[8, -20], width=8, height=10,
+#                                        facecolor='red',
+#                                        edgecolor='black',
+#                                        alpha=0.5,
+#                                        transform=ccrs.PlateCarree()))
+#
+#    ax.text(2, -15, 'ABA',
+#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+#             transform=ccrs.PlateCarree())
+#    
+#    ax.add_patch(mpatches.Rectangle(xy=[-170, -5], width=50, height=10,
+#                                        facecolor='green',
+#                                        edgecolor='black',
+#                                        alpha=0.5,
+#                                        transform=ccrs.PlateCarree()))
+#
+#    ax.text(-150, 1, 'NINO3.4',
+#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+#             transform=ccrs.PlateCarree())
+#    
+#    
+#    ax.add_patch(mpatches.Rectangle(xy=[-21, 9], width=4, height=5,
+#                                        facecolor='orange',
+#                                        edgecolor='black',
+#                                        alpha=0.5,
+#                                        transform=ccrs.PlateCarree()))
+#
+#    ax.text(-27, 10, 'DNI',
+#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+#             transform=ccrs.PlateCarree())
+#    
