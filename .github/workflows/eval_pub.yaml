@@ -17,7 +17,7 @@ on:
 
 jobs:
   run_forecast:
-    runs-on: ubuntu-18.04
+    runs-on: macos-11
     steps:
       
       - name: Copy Repository Contents
