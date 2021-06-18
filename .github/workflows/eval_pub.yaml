@@ -31,7 +31,7 @@ jobs:
       - name: install dependencies
         run: |
           pip3 install -r ./requirements.txt
-          pip install git+https://github.com/SciTools/cartopy.git
+          conda install -c scitools cartopy
           python3 -m ipykernel install --user --name python3
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
