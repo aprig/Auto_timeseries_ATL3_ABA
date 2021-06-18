@@ -26,11 +26,7 @@ jobs:
   
       - name: install dependencies
         run: |
-          sudo apt-get install libgeos++-dev
-          sudo apt-get install libproj-dev
           pip3 install -r ./requirements.txt
-          pip install cython
-          pip install Cartopy
           python3 -m ipykernel install --user --name python3
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
