@@ -2,7 +2,11 @@ name: eval and publish notebook
 
 on:
   schedule:
-    - cron: "0 6 * * *" # everyday at 8am
+
+    - cron: "0 6 * * MON" # everyday monday at 8am
+    - cron: "0 6 * * WED" # everyday monday at 8am
+    - cron: "0 6 * * FRI" # everyday monday at 8am
+    
 
   push:
     branches:
