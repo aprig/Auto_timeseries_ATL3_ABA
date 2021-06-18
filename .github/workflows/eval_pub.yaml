@@ -43,7 +43,7 @@ jobs:
       - name: Convert to HTML
         if: ${{ always() }}
         run: |
-          jupyter nbconvert --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
+          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
 
       - name: Upload notebook
         uses: actions/upload-artifact@v1
