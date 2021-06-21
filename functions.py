@@ -915,3 +915,28 @@ def plot_map_ssta_atl(ssta_atl_wk):
     cbar = plt.colorbar(p0,cax,orientation='horizontal')
     cbar.ax.tick_params(labelsize=ftz)
     ax.set_title(str(ssta_atl_wk.time.values[-1])[:10],fontsize=ftz,fontweight='bold')
+    
+    ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
+                                        edgecolor='red',fill=None,alpha=1,linewidth=3,
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(-12.5, 0.8, 'ATL3',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
+
+    ax.add_patch(mpatches.Rectangle(xy=[8, -20], width=8, height=10,
+                                        fill=None,
+                                        edgecolor='green',alpha=1,linewidth=3,
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(2, -15, 'ABA',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
+    
+    ax.add_patch(mpatches.Rectangle(xy=[-21, 9], width=4, height=5,
+                                        edgecolor='grey',fill=None,alpha=1,linewidth=3,
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(-27, 10, 'DNI',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
