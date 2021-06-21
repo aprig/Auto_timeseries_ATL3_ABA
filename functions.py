@@ -535,6 +535,222 @@ def plot_anomalies_wk_atl3(ssta_atl3):
     ax[1].set_ylim([-3,3])
     
     
+def plot_anomalies_wk_nino34(ssta_nino34):
+    
+    f,ax = plt.subplots(2,1,figsize=[15,10])
+    color_lines='grey'
+    ftz=15
+    ax=ax.ravel()
+    ssta_nino34_1 = ssta_nino34.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
+    ssta_nino34_2 = ssta_nino34.sel(time=slice(datetime(2005, 1, 1), now))
+    ### NINO3.4 ###
+    ax[0].set_title('Normalized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
+                    str(ssta_nino34.time.values[0])[:7] +' --> '+
+                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].plot(ssta_nino34_1.time,ssta_nino34_1,color='black')
+    ax[0].axhline(0,color=color_lines)
+    ax[0].axhline(1,color=color_lines,linestyle='--')
+    ax[0].axhline(-1,color=color_lines,linestyle='--')
+    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[0].xaxis.set_major_locator(years)
+    ax[0].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[0].xaxis.set_major_formatter(myFmt)
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,1,ssta_nino34_1>1,color='red')
+    ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,-1,ssta_nino34_1<-1,color='blue')
+    ax[0].set_ylim([-3,3])
+    
+    
+
+    ### NINO3.4 ###
+    ax[1].set_title('Normalized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
+                    str(ssta_nino34.time.values[0])[:7] +' --> '+
+                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[1].plot(ssta_nino34_2.time,ssta_nino34_2,color='black')
+    ax[1].axhline(0,color=color_lines)
+    ax[1].axhline(1,color=color_lines,linestyle='--')
+    ax[1].axhline(-1,color=color_lines,linestyle='--')
+    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[1].xaxis.set_major_locator(years)
+    ax[1].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[1].xaxis.set_major_formatter(myFmt)
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,1,ssta_nino34_2>1,color='red')
+    ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,-1,ssta_nino34_2<-1,color='blue')
+    ax[1].set_ylim([-3,3])
+    
+def plot_anomalies_wk_dni(ssta_dni):
+    
+    f,ax = plt.subplots(2,1,figsize=[15,10])
+    color_lines='grey'
+    ftz=15
+    ax=ax.ravel()
+    ssta_dni_1 = ssta_dni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
+    ssta_dni_2 = ssta_dni.sel(time=slice(datetime(2005, 1, 1), now))
+    ### NINO3.4 ###
+    ax[0].set_title('Normalized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
+                    str(ssta_dni.time.values[0])[:7] +' --> '+
+                    str(ssta_dni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].plot(ssta_dni_1.time,ssta_dni_1,color='black')
+    ax[0].axhline(0,color=color_lines)
+    ax[0].axhline(1,color=color_lines,linestyle='--')
+    ax[0].axhline(-1,color=color_lines,linestyle='--')
+    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[0].xaxis.set_major_locator(years)
+    ax[0].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[0].xaxis.set_major_formatter(myFmt)
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,1,ssta_dni_1>1,color='red')
+    ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,-1,ssta_dni_1<-1,color='blue')
+    ax[0].set_ylim([-3,3])
+    
+    
+
+    ### NINO3.4 ###
+    ax[1].set_title('Normalized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
+                    str(ssta_dni.time.values[0])[:7] +' --> '+
+                    str(ssta_dni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[1].plot(ssta_dni_2.time,ssta_dni_2,color='black')
+    ax[1].axhline(0,color=color_lines)
+    ax[1].axhline(1,color=color_lines,linestyle='--')
+    ax[1].axhline(-1,color=color_lines,linestyle='--')
+    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[1].xaxis.set_major_locator(years)
+    ax[1].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[1].xaxis.set_major_formatter(myFmt)
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,1,ssta_dni_2>1,color='red')
+    ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,-1,ssta_dni_2<-1,color='blue')
+    ax[1].set_ylim([-3,3]) 
+    
+    
+def plot_anomalies_wk_nni(ssta_nni):
+    
+    f,ax = plt.subplots(2,1,figsize=[15,10])
+    color_lines='grey'
+    ftz=15
+    ax=ax.ravel()
+    ssta_nni_1 = ssta_nni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
+    ssta_nni_2 = ssta_nni.sel(time=slice(datetime(2005, 1, 1), now))
+    ### NINO3.4 ###
+    ax[0].set_title('Normalized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
+                    str(ssta_nni.time.values[0])[:7] +' --> '+
+                    str(ssta_nni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].plot(ssta_nni_1.time,ssta_nni_1,color='black')
+    ax[0].axhline(0,color=color_lines)
+    ax[0].axhline(1,color=color_lines,linestyle='--')
+    ax[0].axhline(-1,color=color_lines,linestyle='--')
+    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[0].xaxis.set_major_locator(years)
+    ax[0].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[0].xaxis.set_major_formatter(myFmt)
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,1,ssta_nni_1>1,color='red')
+    ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,-1,ssta_nni_1<-1,color='blue')
+    ax[0].set_ylim([-3,3])
+    
+    
+
+    ### NINO3.4 ###
+    ax[1].set_title('Normalized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
+                    str(ssta_nni.time.values[0])[:7] +' --> '+
+                    str(ssta_nni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[1].plot(ssta_nni_2.time,ssta_nni_2,color='black')
+    ax[1].axhline(0,color=color_lines)
+    ax[1].axhline(1,color=color_lines,linestyle='--')
+    ax[1].axhline(-1,color=color_lines,linestyle='--')
+    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[1].xaxis.set_major_locator(years)
+    ax[1].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[1].xaxis.set_major_formatter(myFmt)
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,1,ssta_nni_2>1,color='red')
+    ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,-1,ssta_nni_2<-1,color='blue')
+    ax[1].set_ylim([-3,3]) 
+    
+def plot_anomalies_wk_cni(ssta_cni):
+    
+    f,ax = plt.subplots(2,1,figsize=[15,10])
+    color_lines='grey'
+    ftz=15
+    ax=ax.ravel()
+    ssta_cni_1 = ssta_cni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
+    ssta_cni_2 = ssta_cni.sel(time=slice(datetime(2005, 1, 1), now))
+    ### NINO3.4 ###
+    ax[0].set_title('Normalized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
+                    str(ssta_cni.time.values[0])[:7] +' --> '+
+                    str(ssta_cni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].plot(ssta_cni_1.time,ssta_cni_1,color='black')
+    ax[0].axhline(0,color=color_lines)
+    ax[0].axhline(1,color=color_lines,linestyle='--')
+    ax[0].axhline(-1,color=color_lines,linestyle='--')
+    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[0].xaxis.set_major_locator(years)
+    ax[0].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[0].xaxis.set_major_formatter(myFmt)
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,1,ssta_cni_1>1,color='red')
+    ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,-1,ssta_cni_1<-1,color='blue')
+    ax[0].set_ylim([-3,3])
+    
+    
+
+    ### NINO3.4 ###
+    ax[1].set_title('Normalized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
+                    str(ssta_cni.time.values[0])[:7] +' --> '+
+                    str(ssta_cni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[1].plot(ssta_cni_2.time,ssta_cni_2,color='black')
+    ax[1].axhline(0,color=color_lines)
+    ax[1].axhline(1,color=color_lines,linestyle='--')
+    ax[1].axhline(-1,color=color_lines,linestyle='--')
+    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[1].xaxis.set_major_locator(years)
+    ax[1].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[1].xaxis.set_major_formatter(myFmt)
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,1,ssta_cni_2>1,color='red')
+    ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,-1,ssta_cni_2<-1,color='blue')
+    ax[1].set_ylim([-3,3]) 
     
 import cartopy.crs as ccrs
 import cartopy    
