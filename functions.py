@@ -17,7 +17,7 @@ import cartopy
 import matplotlib.patches as mpatches
 now = datetime.now()
 date_time = now.strftime("%d/%m/%Y")
-
+import matplotlib
 
 def nandetrend(y):
     ''' Remove the linear trend from the data '''
@@ -853,7 +853,7 @@ def read_data_compute_anomalies_week_map(path_data):
     ## Make sub areas ##
     sst_atl = sst.where((  sst.lon>=-45) & (sst.lon<=20) &
                            (sst.lat<=30) & (sst.lat>=-30),drop=True)
-    sst_dtd_tmp = np.ones(sst_atl)*np.nan
+    sst_dtd_tmp = np.ones(sst_atl.shape)*np.nan
     for i in range(sst_dtd_tmp.shape[1]):
         for j in range(sst_dtd_tmp.shape[2]):
             sst_dtd_tmp[:,i,j] = nandetrend(sst_atl[:,i,j].values)
@@ -865,11 +865,53 @@ def read_data_compute_anomalies_week_map(path_data):
     ## Compute the SST anomalies ## 
 
     
-    ssta_atl,ssta_atl_norm = ano_norm_t(sst_atl.sst_dtd.load())
-    
-    
-    
+    ssta_atl,ssta_atl_norm = ano_norm_t_wk(sst_atl.sst_dtd.load())
     return ssta_atl_norm
 
 
     
+def plot_map_ssta_atl(ssta_atl_wk):
+    f = plt.figure(figsize=[15,15])
+    n=45
+    x = 0.9
+    ftz=15
+    lower = plt.cm.Blues_r(np.linspace(0, x, n))
+    white = np.ones((100-2*n,4))
+    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
+    colors = np.vstack((lower, white, upper))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
+    bounds= np.arange(-2.5,2.75,0.25)
+    ftz=15
+    minlon = -45
+    maxlon = 30
+    minlat = -30
+    maxlat = 30
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    cax = inset_axes(ax,
+                   width="100%",  # width = 5% of parent_bbox width
+                   height="5%",  # height : 50%
+                   loc='lower left',
+                   bbox_to_anchor=(0, -0.2, 1, 1),
+                   bbox_transform=ax.transAxes,
+                   borderpad=0,
+                   )
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines()
+    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                      linewidth=2, color='black', alpha=0.5, linestyle='-')
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xlabel_style = {'size': 15, 'color': 'black'}
+    gl.ylabel_style = {'size': 15, 'color': 'black'}
+    gl.xlocator = mticker.FixedLocator([-40,-20, 0])
+    gl.ylocator = mticker.FixedLocator([-20, 0,20])
+    ax.coastlines(linewidth=1)
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    p0=ax.contourf(ssta_atl_wk.lon,
+                ssta_atl_wk.lat,
+                ssta_atl_wk.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
+    cbar = plt.colorbar(p0,cax,orientation='horizontal')
+    cbar.ax.tick_params(labelsize=ftz)
+    ax.set_title(str(ssta_atl_wk.time.values[-1])[:10],fontsize=ftz,fontweight='bold')
