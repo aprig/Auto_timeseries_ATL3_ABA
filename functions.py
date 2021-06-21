@@ -841,7 +841,7 @@ def plot_regions_of_interest():
              transform=ccrs.PlateCarree()) 
     
 
-def read_data_compute_anomalies_week_map(path_data):
+def read_data_compute_anomalies_week_map_atl(path_data):
     
     ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
@@ -942,3 +942,103 @@ def plot_map_ssta_atl(ssta_atl_wk):
     ax.text(-27, 10, 'DNI',
              horizontalalignment='left',fontsize=ftz,fontweight='bold',
              transform=ccrs.PlateCarree())
+    
+    
+def read_data_compute_anomalies_week_map_pac(path_data):
+    
+    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
+    mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
+    ds = ds.sst.where(mask.mask[0,:,:]==1)
+    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    
+    ## Make sub areas ##
+    sst_pac = sst.where((  sst.lon>=-180) & (sst.lon<=-60) &
+                           (sst.lat<=35) & (sst.lat>=-35),drop=True)
+    sst_dtd_tmp = np.ones(sst_pac.shape)*np.nan
+    for i in range(sst_dtd_tmp.shape[1]):
+        for j in range(sst_dtd_tmp.shape[2]):
+            sst_dtd_tmp[:,i,j] = nandetrend(sst_pac[:,i,j].values)
+            
+   
+    ## Linearly detrend the data ## 
+    sst_pac = sst_pac.assign_coords(sst_dtd=(['time','lat','lon'],  sst_dtd_tmp))
+
+    ## Compute the SST anomalies ## 
+
+    
+    ssta_pac,ssta_pac_norm = ano_norm_t_wk(sst_pac.sst_dtd.load())
+    return ssta_pac_norm
+
+    
+    
+def plot_map_ssta_pac(ssta_pac_wk):
+    f = plt.figure(figsize=[15,15])
+    n=45
+    x = 0.9
+    ftz=15
+    lower = plt.cm.Blues_r(np.linspace(0, x, n))
+    white = np.ones((100-2*n,4))
+    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
+    colors = np.vstack((lower, white, upper))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
+    bounds= np.arange(-2.5,2.75,0.25)
+    ftz=15
+    minlon = -180
+    maxlon = -60
+    minlat = -35
+    maxlat = 35
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    cax = inset_axes(ax,
+                   width="100%",  # width = 5% of parent_bbox width
+                   height="5%",  # height : 50%
+                   loc='lower left',
+                   bbox_to_anchor=(0, -0.1, 1, 1),
+                   bbox_transform=ax.transAxes,
+                   borderpad=0,
+                   )
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines()
+    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                      linewidth=2, color='black', alpha=0.5, linestyle='-')
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xlabel_style = {'size': 15, 'color': 'black'}
+    gl.ylabel_style = {'size': 15, 'color': 'black'}
+    gl.xlocator = mticker.FixedLocator([-160,-140,-120,-100,-80])
+    gl.ylocator = mticker.FixedLocator([-20, 0,20])
+    ax.coastlines(linewidth=1)
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    p0=ax.contourf(ssta_pac_wk.lon,
+                ssta_pac_wk.lat,
+                ssta_pac_wk.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
+    cbar = plt.colorbar(p0,cax,orientation='horizontal')
+    cbar.ax.tick_params(labelsize=ftz)
+    ax.set_title('Normalized SST anomalies '+str(ssta_pac_wk.time.values[-1])[:10]+' | Baseline '+
+                    str(ssta_pac_wk.time.values[0])[:7] +' --> '+
+                    str(ssta_pac_wk.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    
+    ax.add_patch(mpatches.Rectangle(xy=[-170, -5], width=50, height=10,
+                                        fill=None,
+                                        edgecolor='black',
+                                        alpha=1,linewidth=4,
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(-150, 1, 'NINO3.4',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
+    
+
+    ax.add_patch(mpatches.Rectangle(xy=[-120, 20], width=10, height=10,
+                                        fill=None,
+                                        edgecolor='grey',
+                                        alpha=1,linewidth=4,
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(-120, 15, 'CNI',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree()) 
+
