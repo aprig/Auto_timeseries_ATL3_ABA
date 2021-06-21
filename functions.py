@@ -130,10 +130,10 @@ def read_data_compute_anomalies_week(path_data):
     
     ssta_atl3,ssta_atl3_norm = ano_norm_t_wk(sst_atl3.sst_dtd.load())
     ssta_nino34,ssta_nino34_norm = ano_norm_t_wk(sst_nino34.sst_dtd.load())
-    ssta_aba,ssta_aba_norm = ano_norm_t(sst_aba.sst_dtd.load())
-    ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
-    ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
-    ssta_nni,ssta_nni_norm = ano_norm_t(sst_nni.sst_dtd.load())
+    ssta_aba,ssta_aba_norm = ano_norm_t_wk(sst_aba.sst_dtd.load())
+    ssta_dni,ssta_dni_norm = ano_norm_t_wk(sst_dni.sst_dtd.load())
+    ssta_cni,ssta_cni_norm = ano_norm_t_wk(sst_cni.sst_dtd.load())
+    ssta_nni,ssta_nni_norm = ano_norm_t_wk(sst_nni.sst_dtd.load())
     
     
     return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
