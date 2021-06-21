@@ -128,8 +128,8 @@ def read_data_compute_anomalies_week(path_data):
     ## Compute the SST anomalies ## 
 
     
-    ssta_atl3,ssta_atl3_norm = ano_norm_t(sst_atl3.sst_dtd.load())
-    ssta_nino34,ssta_nino34_norm = ano_norm_t(sst_nino34.sst_dtd.load())
+    ssta_atl3,ssta_atl3_norm = ano_norm_t_wk(sst_atl3.sst_dtd.load())
+    ssta_nino34,ssta_nino34_norm = ano_norm_t_wk(sst_nino34.sst_dtd.load())
     ssta_aba,ssta_aba_norm = ano_norm_t(sst_aba.sst_dtd.load())
     ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
     ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
@@ -840,4 +840,36 @@ def plot_regions_of_interest():
              horizontalalignment='left',fontsize=ftz,fontweight='bold',
              transform=ccrs.PlateCarree()) 
     
-#    
+
+def read_data_compute_anomalies_week_map(path_data):
+    
+    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
+    mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
+    ds = ds.sst.where(mask.mask[0,:,:]==1)
+    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    
+    ## Make sub areas ##
+    sst_atl = sst.where((  sst.lon>=-45) & (sst.lon<=20) &
+                           (sst.lat<=30) & (sst.lat>=-30),drop=True)
+    sst_dtd_tmp = np.ones(sst_atl)*np.nan
+    for i in range(sst_dtd_tmp.shape[1]):
+        for j in range(sst_dtd_tmp.shape[2]):
+            sst_dtd_tmp[:,i,j] = nandetrend(sst_atl[:,i,j].values)
+            
+   
+    ## Linearly detrend the data ## 
+    sst_atl = sst_atl.assign_coords(sst_dtd=(['time','lat','lon'],  sst_dtd_tmp))
+
+    ## Compute the SST anomalies ## 
+
+    
+    ssta_atl,ssta_atl_norm = ano_norm_t(sst_atl.sst_dtd.load())
+    
+    
+    
+    return ssta_atl_norm
+
+
+    
