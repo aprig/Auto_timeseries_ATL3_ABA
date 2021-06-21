@@ -891,7 +891,7 @@ def plot_map_ssta_atl(ssta_atl_wk):
                    width="100%",  # width = 5% of parent_bbox width
                    height="5%",  # height : 50%
                    loc='lower left',
-                   bbox_to_anchor=(0, -0.2, 1, 1),
+                   bbox_to_anchor=(0, -0.1, 1, 1),
                    bbox_transform=ax.transAxes,
                    borderpad=0,
                    )
@@ -914,10 +914,12 @@ def plot_map_ssta_atl(ssta_atl_wk):
                 ssta_atl_wk.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
     cbar = plt.colorbar(p0,cax,orientation='horizontal')
     cbar.ax.tick_params(labelsize=ftz)
-    ax.set_title(str(ssta_atl_wk.time.values[-1])[:10],fontsize=ftz,fontweight='bold')
+    ax.set_title('Normalized SST anomalies '+str(ssta_atl_wk.time.values[-1])[:10]+' | Baseline '+
+                    str(ssta_atl_wk.time.values[0])[:7] +' --> '+
+                    str(ssta_atl_wk.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     
     ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
-                                        edgecolor='red',fill=None,alpha=1,linewidth=3,
+                                        edgecolor='red',fill=None,alpha=1,linewidth=4,
                                         transform=ccrs.PlateCarree()))
 
     ax.text(-12.5, 0.8, 'ATL3',
@@ -926,7 +928,7 @@ def plot_map_ssta_atl(ssta_atl_wk):
 
     ax.add_patch(mpatches.Rectangle(xy=[8, -20], width=8, height=10,
                                         fill=None,
-                                        edgecolor='green',alpha=1,linewidth=3,
+                                        edgecolor='green',alpha=1,linewidth=4,
                                         transform=ccrs.PlateCarree()))
 
     ax.text(2, -15, 'ABA',
@@ -934,7 +936,7 @@ def plot_map_ssta_atl(ssta_atl_wk):
              transform=ccrs.PlateCarree())
     
     ax.add_patch(mpatches.Rectangle(xy=[-21, 9], width=4, height=5,
-                                        edgecolor='grey',fill=None,alpha=1,linewidth=3,
+                                        edgecolor='grey',fill=None,alpha=1,linewidth=4,
                                         transform=ccrs.PlateCarree()))
 
     ax.text(-27, 10, 'DNI',
