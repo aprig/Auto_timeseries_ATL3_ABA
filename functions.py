@@ -880,7 +880,7 @@ def plot_map_ssta_atl(ssta_atl):
     upper = plt.cm.Reds(np.linspace(1-x, 1, n))
     colors = np.vstack((lower, white, upper))
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-    bounds= np.arange(-2.5,2.75,0.25)
+    bounds= np.arange(-3,3.5,0.5)
     ftz=15
     minlon = -45
     maxlon = 30
@@ -944,14 +944,14 @@ def plot_map_ssta_atl(ssta_atl):
              transform=ccrs.PlateCarree())
     
     
-def read_data_compute_anomalies_week_map_pac(path_data):
+def read_data_compute_anomalies_map_pac(path_data):
     
-    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
+    ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
-    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180   
     
     ## Make sub areas ##
     sst_pac = sst.where((  sst.lon>=-180) & (sst.lon<=-60) &
@@ -968,12 +968,12 @@ def read_data_compute_anomalies_week_map_pac(path_data):
     ## Compute the SST anomalies ## 
 
     
-    ssta_pac,ssta_pac_norm = ano_norm_t_wk(sst_pac.sst_dtd.load())
+    ssta_pac,ssta_pac_norm = ano_norm_t(sst_pac.sst_dtd.load())
     return ssta_pac_norm
 
     
     
-def plot_map_ssta_pac(ssta_pac_wk):
+def plot_map_ssta_pac(ssta_pac):
     f = plt.figure(figsize=[15,15])
     n=45
     x = 0.9
@@ -983,7 +983,7 @@ def plot_map_ssta_pac(ssta_pac_wk):
     upper = plt.cm.Reds(np.linspace(1-x, 1, n))
     colors = np.vstack((lower, white, upper))
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-    bounds= np.arange(-2.5,2.75,0.25)
+    bounds= np.arange(-3,3.5,0.5)
     ftz=15
     minlon = -180
     maxlon = -60
@@ -1012,14 +1012,14 @@ def plot_map_ssta_pac(ssta_pac_wk):
     ax.coastlines(linewidth=1)
     ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
     ax.coastlines(resolution='50m', color='black', linewidth=1)
-    p0=ax.contourf(ssta_pac_wk.lon,
-                ssta_pac_wk.lat,
-                ssta_pac_wk.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
+    p0=ax.contourf(ssta_pac.lon,
+                ssta_pac.lat,
+                ssta_pac.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
     cbar = plt.colorbar(p0,cax,orientation='horizontal')
     cbar.ax.tick_params(labelsize=ftz)
-    ax.set_title('Normalized SST anomalies '+str(ssta_pac_wk.time.values[-1])[:10]+' | Baseline '+
-                    str(ssta_pac_wk.time.values[0])[:7] +' --> '+
-                    str(ssta_pac_wk.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax.set_title('Normalized SST anomalies '+str(ssta_pac.time.values[-1])[:7]+' | Baseline '+
+                    str(ssta_pac.time.values[0])[:7] +' --> '+
+                    str(ssta_pac.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     
     ax.add_patch(mpatches.Rectangle(xy=[-170, -5], width=50, height=10,
                                         fill=None,
@@ -1045,14 +1045,15 @@ def plot_map_ssta_pac(ssta_pac_wk):
     
     
     
-def read_data_compute_anomalies_week_map_ind(path_data):
+def read_data_compute_anomalies_map_ind(path_data):
     
-    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
+    ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
-    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180   
+      
     
     ## Make sub areas ##
     sst_ind = sst.where((  sst.lon>=30) & (sst.lon<=180) &
@@ -1069,12 +1070,12 @@ def read_data_compute_anomalies_week_map_ind(path_data):
     ## Compute the SST anomalies ## 
 
     
-    ssta_ind,ssta_ind_norm = ano_norm_t_wk(sst_ind.sst_dtd.load())
+    ssta_ind,ssta_ind_norm = ano_norm_t(sst_ind.sst_dtd.load())
     return ssta_ind_norm
 
     
     
-def plot_map_ssta_ind(ssta_ind_wk):
+def plot_map_ssta_ind(ssta_ind):
     f = plt.figure(figsize=[15,15])
     n=45
     x = 0.9
@@ -1084,7 +1085,7 @@ def plot_map_ssta_ind(ssta_ind_wk):
     upper = plt.cm.Reds(np.linspace(1-x, 1, n))
     colors = np.vstack((lower, white, upper))
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-    bounds= np.arange(-2.5,2.75,0.25)
+    bounds= np.arange(-3,3.5,0.5)
     ftz=15
     minlon = 30
     maxlon = 170
@@ -1113,14 +1114,14 @@ def plot_map_ssta_ind(ssta_ind_wk):
     ax.coastlines(linewidth=1)
     ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
     ax.coastlines(resolution='50m', color='black', linewidth=1)
-    p0=ax.contourf(ssta_ind_wk.lon,
-                ssta_ind_wk.lat,
-                ssta_ind_wk.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
+    p0=ax.contourf(ssta_ind.lon,
+                ssta_ind.lat,
+                ssta_ind.sst_dtd[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
     cbar = plt.colorbar(p0,cax,orientation='horizontal')
     cbar.ax.tick_params(labelsize=ftz)
-    ax.set_title('Normalized SST anomalies '+str(ssta_ind_wk.time.values[-1])[:10]+' | Baseline '+
-                    str(ssta_ind_wk.time.values[0])[:7] +' --> '+
-                    str(ssta_ind_wk.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax.set_title('Normalized SST anomalies '+str(ssta_ind.time.values[-1])[:7]+' | Baseline '+
+                    str(ssta_ind.time.values[0])[:7] +' --> '+
+                    str(ssta_ind.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     
     ax.add_patch(mpatches.Rectangle(xy=[108, -28], width=7, height=6,edgecolor='pink',
                                         alpha=1,linewidth=4,
