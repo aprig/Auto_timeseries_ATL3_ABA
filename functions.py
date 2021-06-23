@@ -1057,7 +1057,7 @@ def read_data_compute_anomalies_map_ind(path_data):
     
     ## Make sub areas ##
     sst_ind = sst.where((  sst.lon>=30) & (sst.lon<=180) &
-                           (sst.lat<=35) & (sst.lat>=-35),drop=True)
+                           (sst.lat<=25) & (sst.lat>=-45),drop=True)
     sst_dtd_tmp = np.ones(sst_ind.shape)*np.nan
     for i in range(sst_dtd_tmp.shape[1]):
         for j in range(sst_dtd_tmp.shape[2]):
@@ -1123,7 +1123,7 @@ def plot_map_ssta_ind(ssta_ind):
                     str(ssta_ind.time.values[0])[:7] +' --> '+
                     str(ssta_ind.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     
-    ax.add_patch(mpatches.Rectangle(xy=[108, -28], width=7, height=6,edgecolor='pink',
+    ax.add_patch(mpatches.Rectangle(xy=[108, -28], width=7, height=6,edgecolor='pink',fill=None,
                                         alpha=1,linewidth=4,
                                         transform=ccrs.PlateCarree()))
 
