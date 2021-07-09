@@ -1175,47 +1175,70 @@ def plot_wamoi(cmap_data):
     precip_SI_std = precip_SI/precip_SI.std(dim='time')
     
     wamoi = precip_NI_std - precip_SI_std
-    
+
     wamoi_clim = np.ones((now.year+1-2000,73))*np.nan
+    onset_date = np.ones((now.year+1-2000))*np.nan
     k=0
+
     for i in range(2000,now.year+1,1):
         try:
-            wamoi_clim[k,:] = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
             
+            wamoi_clim[k,:] = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            tmp = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            index_WAM = xr.full_like(tmp,0)
+            index_WAM[tmp >= 0] = 1
+            index_tmp = []
+            for j in range(index_WAM.shape[0]-4):
+                if (index_WAM[j] ==1) & (index_WAM[j+1] ==1) & (index_WAM[j+2] ==1)& (index_WAM[j+3] ==1):
+                    index_tmp.append(j)
+            try:       
+                onset_date[k]=index_tmp[0]
+            except IndexError:
+                pass
+
             k+=1
         except ValueError:
             test = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
             new = np.ones((73))*np.nan
             new[:test.shape[0]] = test
             wamoi_clim[k,:]=new
+
+
             
             
             
     time = wamoi.sel(time=slice(datetime(2020, 1, 1),datetime(2020, 12, 31) ))   
     
     
-    f,ax = plt.subplots(1,1,figsize=[15,15])
+    f,ax = plt.subplots(2,1,figsize=[15,10])
     ftz=20
+    ax=ax.ravel()
     
-    ax.plot(time.time,np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-2021')
+    ax[0].plot(time.time,np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-2021')
     
     for i in range(wamoi_clim.shape[0]):
-        ax.plot(time.time,wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
-    ax.plot(time.time,wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
-    ax.legend(fontsize=ftz)
-    ax.tick_params(labelsize=ftz)
+        ax[0].plot(time.time,wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
+    ax[0].plot(time.time,wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
+    ax[0].legend(fontsize=ftz)
+    ax[0].tick_params(labelsize=ftz)
     #
     locator = mdates.MonthLocator()  # every month
     # Specify the format - %b gives us Jan, Feb...
     fmt = mdates.DateFormatter('%b')
-    ax.xaxis.set_major_locator(locator)
+    ax[0].xaxis.set_major_locator(locator)
     # Specify formatter
-    ax.xaxis.set_major_formatter(fmt)
-    ax.set_ylabel('WAMOI',fontsize=ftz,fontweight='bold')
-    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
-           size=ftz,
-           weight='bold')
-    ax.set_title(str(wamoi.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].xaxis.set_major_formatter(fmt)
+    ax[0].set_ylabel('WAMOI',fontsize=ftz,fontweight='bold')
+    ax[0].set_title(str(wamoi.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[0].axhline(0,color='black',linestyle='--')
+    
+    xtime = pd.date_range(start='1/1/2000', periods=now.year+1-2000, freq='Y')
+    ax[1].plot(xtime,onset_date,color='black',linewidth=3)
+    ax[1].set_ylabel('Onset date [Pentad num]',fontsize=ftz,fontweight='bold')
+    ax[1].set_xlabel('Year',fontsize=ftz,fontweight='bold')
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].axhline(36,color='grey',label='1st July')
+    ax[1].legend(fontsize=ftz)
     
     
     
