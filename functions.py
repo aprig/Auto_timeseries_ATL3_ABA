@@ -1190,3 +1190,32 @@ def plot_wamoi(cmap_data):
     # Specify formatter
     ax.xaxis.set_major_formatter(fmt)
     ax.set_ylabel('WAMOI',fontsize=ftz,fontweight='bold')
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+           size=ftz,
+           weight='bold')
+    
+    
+    
+def plot_amm(data_amm):
+    df = pd.read_csv(data_amm) 
+    AMM = np.ones((df.shape[0]))*np.nan
+    for i in range(AMM.shape[0]):
+        AMM[i] = float(np.array(df.values[i,0].split())[2])
+
+    time = pd.date_range(start='1/1/1948', periods=AMM.shape[0], freq='M')
+
+    f,ax = plt.subplots(1,1,figsize=[15,5])
+    ftz=15
+    ax.plot(time,AMM,color='black',linewidth=2)
+    ax.axhline(0,color='black')
+    ax.tick_params(labelsize=ftz)
+    ax.set_title('AMM (SST based) | '+str(time[-1])[:7]+' | Chiang and Vimont (2004)',fontsize=ftz,fontweight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+           size=ftz,
+           weight='bold')
