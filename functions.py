@@ -1132,3 +1132,61 @@ def plot_map_ssta_ind(ssta_ind):
              transform=ccrs.PlateCarree()) 
 
 
+def plot_wamoi(cmap_data):
+
+    ds = xr.open_dataset(cmap_data,engine='pydap')
+    
+    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    precip = xr.concat([ds.precip[:, :, 72:], ds.precip[:, :, :72]], dim='lon')
+    precip.coords['lon'] = (precip.coords['lon'] + 180) % 360 - 180
+    
+    
+    
+    precip_NI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
+                               (precip.lat<=20) & (precip.lat>=7.5),drop=True).mean(dim='lon').mean(dim='lat')
+    
+    precip_SI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
+                               (precip.lat<=7.5) & (precip.lat>=0),drop=True).mean(dim='lon').mean(dim='lat')
+    
+    # standardize
+    precip_NI_std = precip_NI/precip_NI.std(dim='time')
+    precip_SI_std = precip_SI/precip_SI.std(dim='time')
+    
+    wamoi = precip_NI_std - precip_SI_std
+    
+    wamoi_clim = np.ones((now.year+1-2000,73))*np.nan
+    k=0
+    for i in range(2000,now.year+1,1):
+        try:
+            wamoi_clim[k,:] = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            
+            k+=1
+        except ValueError:
+            test = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            new = np.ones((73))*np.nan
+            new[:test.shape[0]] = test
+            wamoi_clim[k,:]=new
+            
+            
+            
+    time = wamoi.sel(time=slice(datetime(2020, 1, 1),datetime(2020, 12, 31) ))   
+    
+    
+    f,ax = plt.subplots(1,1,figsize=[15,15])
+    ftz=20
+    
+    ax.plot(time.time,np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-2021')
+    
+    for i in range(wamoi_clim.shape[0]):
+        ax.plot(time.time,wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
+    ax.plot(time.time,wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
+    ax.legend(fontsize=ftz)
+    ax.tick_params(labelsize=ftz)
+    #
+    locator = mdates.MonthLocator()  # every month
+    # Specify the format - %b gives us Jan, Feb...
+    fmt = mdates.DateFormatter('%b')
+    ax.xaxis.set_major_locator(locator)
+    # Specify formatter
+    ax.xaxis.set_major_formatter(fmt)
+    ax.set_ylabel('WAMOI',fontsize=ftz,fontweight='bold')
