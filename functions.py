@@ -777,6 +777,28 @@ def plot_regions_of_interest():
     ax.coastlines(linewidth=1)
     ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
     ax.coastlines(resolution='50m', color='black', linewidth=1)
+    
+    
+    ax.add_patch(mpatches.Rectangle(xy=[-10, 7.5], width=20, height=12.5,
+                                        facecolor='cyan',
+                                        alpha=0.5,
+                                        edgecolor='black',
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(12.5, 15, 'NI',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
+    
+    ax.add_patch(mpatches.Rectangle(xy=[-10, 0], width=20, height=7.5,
+                                        facecolor='cyan',
+                                        alpha=0.5,
+                                        edgecolor='black',
+                                        transform=ccrs.PlateCarree()))
+
+    ax.text(12.5, 2.5, 'SI',
+             horizontalalignment='left',fontsize=ftz,fontweight='bold',
+             transform=ccrs.PlateCarree())
+    
 
     ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
                                         facecolor='blue',
@@ -1193,6 +1215,7 @@ def plot_wamoi(cmap_data):
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
            size=ftz,
            weight='bold')
+    ax.set_title(str(wamoi.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     
     
     
