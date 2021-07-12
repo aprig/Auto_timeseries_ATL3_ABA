@@ -1362,7 +1362,7 @@ def read_data_ACT_week_plot(path_data):
     ax[0].xaxis.set_major_formatter(fmt)
 
     xtime = pd.date_range(start='1/1/1989', periods=now.year+1-1990, freq='Y')
-    ax[1].plot(xtime,onset_date,color='black')
+    ax[1].plot(xtime,np.array(onset_date)*7,color='black')
     ax[1].tick_params(labelsize=ftz)
 
     locator = mdates.YearLocator(2)  # every month
@@ -1371,7 +1371,7 @@ def read_data_ACT_week_plot(path_data):
     ax[1].xaxis.set_major_locator(locator)
     # Specify formatter
     ax[1].xaxis.set_major_formatter(fmt)
-    ax[1].set_ylabel('Onset date [Week number]',fontsize=ftz,fontweight='bold')
+    ax[1].set_ylabel('Onset date [Day of year]',fontsize=ftz,fontweight='bold')
     ax[1].axhline(21,label='1st June',color='grey')
 
     ax[1].legend(fontsize=ftz)
