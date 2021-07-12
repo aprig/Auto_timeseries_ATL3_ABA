@@ -1372,7 +1372,7 @@ def read_data_ACT_week_plot(path_data):
     # Specify formatter
     ax[1].xaxis.set_major_formatter(fmt)
     ax[1].set_ylabel('Onset date [Day of year]',fontsize=ftz,fontweight='bold')
-    ax[1].axhline(21,label='1st June',color='grey')
+    ax[1].axhline(21*7,label='1st June',color='grey')
 
     ax[1].legend(fontsize=ftz)
     ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
