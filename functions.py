@@ -1265,3 +1265,118 @@ def plot_amm(data_amm):
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
            size=ftz,
            weight='bold')
+    
+    
+    
+    
+import haversine
+def read_data_ACT_week_plot(path_data):
+
+    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
+    mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
+    ds = ds.sst.where(mask.mask[0,:,:]==1)
+    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    
+    ## Make sub areas ##
+    sst_act = sst.where((  sst.lon>=-30) & (sst.lon<=12) &
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    
+    
+    
+    
+    
+    sst_index = np.array(25-sst_act)
+    Sact = np.zeros((sst_act.shape[0]))
+    Tact = np.zeros((sst_act.shape[0]))
+    X = np.ones((sst_act.shape[2]-1,sst_act.shape[1]-1))
+    Y = np.ones((sst_act.shape[2]-1,sst_act.shape[1]-1))
+    lon = np.array(sst_act.lon)
+    lat = np.array(sst_act.lat)
+    for t in range(Sact.shape[0]):
+        tmp_sact=0
+        tmp_tact=0
+        for i in range(sst_act.shape[2]-1):
+            for j in range(sst_act.shape[1]-1):
+
+
+
+                if sst_index[t,j,i]>0:
+
+                    X = haversine.haversine((lon[i], lat[j]),
+                                        (lon[i+1], lat[j]))
+
+                    Y = haversine.haversine((lon[i], lat[j]),
+                                        (lon[i], lat[j+1]))
+                    tmp_sact += X*Y
+                    tmp_tact += X*Y*sst_index[t,j,i]
+
+        Sact[t] =tmp_sact
+        Tact[t] = tmp_tact/Sact[t]
+
+    Sact_dataset = xr.Dataset({'sact': (['time'], Sact)},
+                          coords={ 'time':(np.array(sst_act.time)),
+                              })
+
+
+
+
+
+
+    onset_date=[]
+    for i in range(1990,now.year+1,1):
+        index_tmp = []
+        try:
+
+            sact_clim = Sact_dataset.sact.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+
+
+            for j in range(sact_clim.shape[0]):
+                if sact_clim[j]>0.4*1e6:
+                    index_tmp.append(j)
+            onset_date.append(index_tmp[0])
+
+        except IndexError:
+
+            onset_date.append(np.nan)
+
+
+
+    f,ax = plt.subplots(2,1,figsize=[15,10],sharex=True)
+    ax=ax.ravel()
+    ftz=15
+    ax[0].plot(Sact_dataset.time,Sact_dataset.sact*1e-6,color='grey')
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].axhline(0.4,color='red',label='treshold = 0.4 1e6 km$^{2}$')
+    ax[0].legend(fontsize=ftz)
+    ax[0].set_ylabel('S$_{act}$ [10$^{6}$ km$^{2}$]',fontsize=ftz,fontweight='bold')
+    ax[0].set_title('Atlantic Cold Tongue Onset',fontsize=ftz,fontweight='bold')
+    ax[1].set_xlabel('Year', fontsize=ftz)
+
+    locator = mdates.YearLocator(2)  # every month
+    # Specify the format - %b gives us Jan, Feb...
+    fmt = mdates.DateFormatter('%Y')
+    ax[0].xaxis.set_major_locator(locator)
+    # Specify formatter
+    ax[0].xaxis.set_major_formatter(fmt)
+
+    xtime = pd.date_range(start='1/1/1989', periods=now.year+1-1990, freq='Y')
+    ax[1].plot(xtime,onset_date,color='black')
+    ax[1].tick_params(labelsize=ftz)
+
+    locator = mdates.YearLocator(2)  # every month
+    # Specify the format - %b gives us Jan, Feb...
+    fmt = mdates.DateFormatter('%Y')
+    ax[1].xaxis.set_major_locator(locator)
+    # Specify formatter
+    ax[1].xaxis.set_major_formatter(fmt)
+    ax[1].set_ylabel('Onset date [Week number]',fontsize=ftz,fontweight='bold')
+    ax[1].axhline(21,label='1st June',color='grey')
+
+    ax[1].legend(fontsize=ftz)
+    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+               size=ftz,
+               weight='bold')
+    
+    return sst_act
