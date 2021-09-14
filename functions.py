@@ -861,6 +861,7 @@ def plot_regions_of_interest():
     ax.text(108, -32, 'NNI',
              horizontalalignment='left',fontsize=ftz,fontweight='bold',
              transform=ccrs.PlateCarree()) 
+    plt.show()
     
 
 def read_data_compute_anomalies_map_atl(path_data):
@@ -1429,4 +1430,56 @@ def plot_amo(data_amo):
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
                size=ftz,
                weight='bold')
+    
+    
+def read_compute_anomalies_uwind_plot(data):
+
+    ds = xr.open_dataset(data,engine='pydap')
+    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    uwnd = xr.concat([ds.uwnd[:, :, 72:], ds.uwnd[:, :, :72]], dim='lon')
+    uwnd.coords['lon'] = (uwnd.coords['lon'] + 180) % 360 - 180
+
+
+
+    ## Make sub areas ##
+    uwnd_atl4 = uwnd.where((  uwnd.lon>=-40) & (uwnd.lon<=-20) &
+                           (uwnd.lat<=3) & (uwnd.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
+
+
+    ## Linearly detrend the data ## 
+    uwnd_atl4 = uwnd_atl4.assign_coords(uwnd_dtd=('time',  nandetrend(uwnd_atl4.values)))
+
+
+
+
+    ## Compute the uwnd anomalies ## 
+
+
+    uwnda_atl4,uwnda_atl4_norm = ano_norm_t_wk(uwnd_atl4.uwnd_dtd.load())
+    
+    
+    f,ax = plt.subplots(1,1,figsize=[15,5])
+    color_lines='grey'
+    ftz=15
+    ax.plot(uwnda_atl4_norm.time,uwnda_atl4_norm)
+    ax.axhline(0,color=color_lines)
+    ax.axhline(1,color=color_lines,linestyle='--')
+    ax.axhline(-1,color=color_lines,linestyle='--')
+    ax.plot(uwnda_atl4_norm.time.values,uwnda_atl4_norm,color='black')
+    years = mdates.YearLocator(5)   # every year
+    years_minor = mdates.YearLocator(1)  # every month
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.tick_params(labelsize=ftz)
+    ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,1,uwnda_atl4_norm>1,color='red')
+    ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,-1,uwnda_atl4_norm<-1,color='blue')
+    ax.set_title('Normalized UWND anomalies ATL4 [40$^{\circ}$W-20$^{\circ}$W; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
+                 str(uwnda_atl4_norm.time.values[0])[:7] +' --> '+
+                 str(uwnda_atl4_norm.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+           size=ftz,
+           weight='bold')
+    ax.set_ylim([-3,3])
 
