@@ -18,7 +18,7 @@ import matplotlib.patches as mpatches
 now = datetime.now()
 date_time = now.strftime("%d/%m/%Y")
 import matplotlib
-from IPython.display import Image
+
 def nandetrend(y):
     ''' Remove the linear trend from the data '''
     
@@ -861,7 +861,7 @@ def plot_regions_of_interest():
     ax.text(108, -32, 'NNI',
              horizontalalignment='left',fontsize=ftz,fontweight='bold',
              transform=ccrs.PlateCarree()) 
-    plt.show()
+ 
     
 
 def read_data_compute_anomalies_map_atl(path_data):
