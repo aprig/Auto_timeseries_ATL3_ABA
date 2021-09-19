@@ -1482,4 +1482,45 @@ def read_compute_anomalies_uwind_plot(data):
            size=ftz,
            weight='bold')
     ax.set_ylim([-3,3])
+    
+    
+def plot_slp(ncep_data_slp):
+    ds = xr.open_dataset(ncep_data_slp,engine='pydap')
+    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    slp = xr.concat([ds.slp[:, :, 72:], ds.slp[:, :, :72]], dim='lon')
+    slp.coords['lon'] = (slp.coords['lon'] + 180) % 360 - 180
+    slp_atl = slp.where((  slp.lon>=-30) & (slp.lon<=-10) &
+                           (slp.lat<=-20) & (slp.lat>=-40),drop=True).mean(dim='lon').mean(dim='lat')
+
+
+    ## Linearly detrend the data ## 
+    slp_atl = slp_atl.assign_coords(slp_dtd=('time',  nandetrend(slp_atl.values)))
+
+
+
+
+    ## Compute the slp anomalies ## 
+    slpa_atl,slpa_atl_norm = ano_norm_t_wk(slp_atl.slp_dtd.load())
+    slpa_atl_norm_3mean = slpa_atl_norm.rolling(time=3,center='mean').mean()
+    
+    
+    f,ax = plt.subplots(1,1,figsize=[15,5])
+    ftz=15
+    ax.plot(slpa_atl_norm_3mean.time,slpa_atl_norm_3mean,color='black',linewidth=2)
+    ax.axhline(0,color='black')
+    ax.axhline(1,color='black',linestyle='--')
+    ax.axhline(-1,color='black',linestyle='--')
+    ax.fill_between(slpa_atl_norm_3mean.time.values,slpa_atl_norm_3mean,1,slpa_atl_norm_3mean>1,color='red')
+    ax.fill_between(slpa_atl_norm_3mean.time.values,slpa_atl_norm_3mean,-1,slpa_atl_norm_3mean<-1,color='blue')
+    ax.tick_params(labelsize=ftz)
+    ax.set_title('St. Helena index (SLP based) | '+
+                 str(slpa_atl_norm.time.values[-1])[:7]+
+                 ' | 40$^{\circ}$S-20$^{\circ}$S; 30$^{\circ}$W-10$^{\circ}$W | Lübbecke et al., (2010)',
+                 fontsize=ftz,fontweight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
 
