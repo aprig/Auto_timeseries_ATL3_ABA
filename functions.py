@@ -795,6 +795,7 @@ def read_data_compute_anomalies_map_atl(path_data):
 def plot_map_ssta(ssta_data):
     plot = ssta_data.hvplot.contourf(
         'lon', 'lat', 'ssta', projection=ccrs.PlateCarree(),levels=np.arange(-3,3.3,0.3),clabel='SST anomalies [K]', cmap='RdYlBu_r',widget_location='bottom',fontsize=15,xlabel='Longitude',ylabel='Latitude',
+        label='Time:'+ str(ssta_data.time.values)[:7],
         coastline=True
     )
     return plot
