@@ -52,3 +52,4 @@ xarray==0.18.2
 zict==2.0.0
 ipython==7.27.0
 hvplot==0.7.3
+geoviews==1.9.2
