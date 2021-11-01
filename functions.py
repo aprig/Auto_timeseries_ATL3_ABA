@@ -792,88 +792,68 @@ def read_data_compute_anomalies_map_atl(path_data):
                                 'lon':(np.array(ssta_atl.lon))})
     return ssta_data
 
+#def plot_map_ssta(ssta_data):
+#    plot = ssta_data.hvplot.contourf(
+#        'lon', 'lat', 'ssta', projection=ccrs.PlateCarree(),levels=np.arange(-3,3.3,0.3),clabel='SST anomalies [K]', cmap='RdYlBu_r',widget_location='bottom',fontsize=15,xlabel='Longitude',ylabel='Latitude',
+#        label='Time:'+ str(ssta_data.time.values)[:7],
+#        coastline=True
+#    )
+#    return plot
 def plot_map_ssta(ssta_data):
-    plot = ssta_data.hvplot.contourf(
-        'lon', 'lat', 'ssta', projection=ccrs.PlateCarree(),levels=np.arange(-3,3.3,0.3),clabel='SST anomalies [K]', cmap='RdYlBu_r',widget_location='bottom',fontsize=15,xlabel='Longitude',ylabel='Latitude',
-        label='Time:'+ str(ssta_data.time.values)[:7],
-        coastline=True
-    )
-    return plot
     
-#def plot_map_ssta_atl(ssta_atl):
-#    f = plt.figure(figsize=[15,15])
-#    n=45
-#    x = 0.9
-#    ftz=15
-#    lower = plt.cm.Blues_r(np.linspace(0, x, n))
-#    white = np.ones((100-2*n,4))
-#    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
-#    colors = np.vstack((lower, white, upper))
-#    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-#    bounds= np.arange(-3,3.3,0.3)
-#    ftz=15
-#    minlon = -45
-#    maxlon = 30
-#    minlat = -30
-#    maxlat = 30
-#    ax = plt.axes(projection=ccrs.PlateCarree())
-#    cax = inset_axes(ax,
-#                   width="100%",  # width = 5% of parent_bbox width
-#                   height="5%",  # height : 50%
-#                   loc='lower left',
-#                   bbox_to_anchor=(0, -0.1, 1, 1),
-#                   bbox_transform=ax.transAxes,
-#                   borderpad=0,
-#                   )
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines()
-#    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
-#    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-#                      linewidth=2, color='black', alpha=0.5, linestyle='-')
-#    gl.xlabels_top = False
-#    gl.ylabels_right = False
-#    gl.xlabel_style = {'size': 15, 'color': 'black'}
-#    gl.ylabel_style = {'size': 15, 'color': 'black'}
-#    gl.xlocator = mticker.FixedLocator([-40,-20, 0])
-#    gl.ylocator = mticker.FixedLocator([-20, 0,20])
-#    ax.coastlines(linewidth=1)
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines(resolution='50m', color='black', linewidth=1)
-#    p0=ax.contourf(ssta_atl.lon,
-#                ssta_atl.lat,
-#                ssta_atl[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
-#    cbar = plt.colorbar(p0,cax,orientation='horizontal')
-#    cbar.ax.tick_params(labelsize=ftz)
-#    ax.set_title('Normalized SST anomalies '+str(ssta_atl.time.values[-1])[:10]+' | Baseline '+
-#                    str(ssta_atl.time.values[0])[:7] +' --> '+
-#                    str(ssta_atl.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-#    
-#    ax.add_patch(mpatches.Rectangle(xy=[-20, -3], width=20, height=6,
-#                                        edgecolor='red',fill=None,alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(-12.5, 0.8, 'ATL3',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree())
-#
-#    ax.add_patch(mpatches.Rectangle(xy=[8, -20], width=8, height=10,
-#                                        fill=None,
-#                                        edgecolor='green',alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(2, -15, 'ABA',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree())
-#    
-#    ax.add_patch(mpatches.Rectangle(xy=[-21, 9], width=4, height=5,
-#                                        edgecolor='grey',fill=None,alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(-27, 10, 'DNI',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree())
-#    
-#    
+    
+    f = plt.figure(figsize=[15,15])
+    n=45
+    x = 0.9
+    ftz=15
+    lower = plt.cm.Blues_r(np.linspace(0, x, n))
+    white = np.ones((100-2*n,4))
+    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
+    colors = np.vstack((lower, white, upper))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
+    bounds= np.arange(-3,3.3,0.3)
+    ftz=15
+    minlon = ssta_data.lon.min()
+    maxlon = ssta_data.lon.max()
+    minlat = ssta_data.lat.min()
+    maxlat = ssta_data.lat.max()
+    
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    cax = inset_axes(ax,
+                   width="100%",  # width = 5% of parent_bbox width
+                   height="5%",  # height : 50%
+                   loc='lower left',
+                   bbox_to_anchor=(0, -0.1, 1, 1),
+                   bbox_transform=ax.transAxes,
+                   borderpad=0,
+                   )
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines()
+    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                      linewidth=2, color='black', alpha=0.5, linestyle='-')
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xlabel_style = {'size': 15, 'color': 'black'}
+    gl.ylabel_style = {'size': 15, 'color': 'black'}
+    gl.xlocator = mticker.FixedLocator([-160,-140,-120,-100,-80,-60,-40,-20, 0,20,40,60,80,100,120,140,160])
+    gl.ylocator = mticker.FixedLocator([-20, 0,20])
+    ax.coastlines(linewidth=1)
+    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    c0=ax.contour(ssta_data.lon,
+                ssta_data.lat,
+                ssta_data,transform=ccrs.PlateCarree(),colors='black',levels=bounds)
+    ax.clabel(c0, inline=True, fontsize=10)
+    p0=ax.contourf(ssta_data.lon,
+                ssta_data.lat,
+                ssta_data,transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
+    cbar = plt.colorbar(p0,cax,orientation='horizontal')
+    cbar.ax.tick_params(labelsize=ftz)
+    cbar.set_label(r' [$^{\circ}$C]', size=ftz,weight='bold')
+    ax.set_title('SST anomalies '+str(ssta_data.time.values)[:10],fontsize=ftz,fontweight='bold')
+
+
 def read_data_compute_anomalies_map_pac(path_data):
     
     ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
