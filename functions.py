@@ -28,6 +28,82 @@ def nandetrend(y):
     y_detrended= np.array(y) - m*x -b
     return y_detrended
 
+def find_event(timeserie_ano_ABA_file,treshold):
+    
+    index_nino_sst = xr.full_like(timeserie_ano_ABA_file,np.nan)
+    index_nino_sst[timeserie_ano_ABA_file >= treshold] = 1
+    index_nino_sst[timeserie_ano_ABA_file <  treshold] = 0
+    index_nino_sst_tmp = np.array(index_nino_sst)
+    #print(index_nino_sst_tmp)
+    index_nina_sst = xr.full_like(timeserie_ano_ABA_file,np.nan)
+    index_nina_sst[timeserie_ano_ABA_file <= -treshold] = 1
+    index_nina_sst[timeserie_ano_ABA_file > - treshold] = 0
+    index_nina_sst_tmp = np.array(index_nina_sst)
+    
+    
+    diff_indexes_nino = np.diff(index_nino_sst_tmp[:])
+    diff_indexes_nina = np.diff(index_nina_sst_tmp[:])
+
+    id_str_nino = []
+    id_end_nino = []
+    for i in range(len(diff_indexes_nino)):
+        if diff_indexes_nino[i]==1.0:
+            id_str_nino.append(i+1)
+        elif diff_indexes_nino[i] == -1.0:
+            id_end_nino.append(i+1)
+            
+    if id_str_nino[0]>id_end_nino[0]:
+        id_end_nino.pop(0)
+
+    if len(id_str_nino)> len(id_end_nino):
+        id_str_nino.pop(-1)
+    elif len(id_str_nino)< len(id_end_nino):
+        id_end_nino.pop(-1)
+    
+
+        
+    id_str_nina = []
+    id_end_nina = []
+    for i in range(len(diff_indexes_nina)):
+        if diff_indexes_nina[i]==1.0:
+            id_str_nina.append(i+1)
+        elif diff_indexes_nina[i] == -1.0:
+            id_end_nina.append(i+1)
+    #print(id_str_nina)
+    #print(id_end_nina)
+    
+    if id_str_nina[0]>id_end_nina[0]:
+        id_end_nina.pop(0)
+
+        
+    if len(id_str_nina)> len(id_end_nina):
+        id_str_nina.pop(-1)
+    elif len(id_str_nina)< len(id_end_nina):
+        id_end_nina.pop(-1)
+        
+    
+        
+    try:
+        nino_indexes_tmp= np.vstack((id_str_nino,id_end_nino))
+        length_events_nino = nino_indexes_tmp[1,:] - nino_indexes_tmp[0,:]
+        nino_indexes = np.vstack((nino_indexes_tmp,length_events_nino))
+    except ValueError:
+        nino_indexes_tmp= np.vstack((id_str_nino,id_end_nino[:-1]))
+        length_events_nino = nino_indexes_tmp[1,:] - nino_indexes_tmp[0,:]
+        nino_indexes = np.vstack((nino_indexes_tmp,length_events_nino))
+        
+    try:
+        nina_indexes_tmp= np.vstack((id_str_nina,id_end_nina[:]))
+        length_events_nina = nina_indexes_tmp[1,:] - nina_indexes_tmp[0,:]
+        nina_indexes = np.vstack((nina_indexes_tmp,length_events_nina))
+    except ValueError:
+        nina_indexes_tmp= np.vstack((id_str_nina,id_end_nina[1:]))
+        length_events_nina = nina_indexes_tmp[1,:] - nina_indexes_tmp[0,:]
+        nina_indexes = np.vstack((nina_indexes_tmp,length_events_nina))
+    
+    
+    return np.array(nino_indexes), np.array(nina_indexes)
+
 
 def ano_norm_t(ds):
     
@@ -275,6 +351,18 @@ def read_data_compute_anomalies_ersstv5(path_data):
     
     return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
 
+def create_table_event(ssta):
+    warm,cold=find_event(ssta,1)
+    data_table_warm = np.vstack((ssta[warm[0,warm[2,:]>3]].time,
+                           ssta[warm[1,warm[2,:]>3]].time))
+    df_warm = pd.DataFrame(data_table_warm.T, columns = ['Start date','End date'], 
+                      )
+    data_table_cold = np.vstack((ssta[cold[0,cold[2,:]>3]].time,
+                           ssta[cold[1,cold[2,:]>3]].time))
+    df_cold = pd.DataFrame(data_table_cold.T, columns = ['Start date','End date'])
+        
+    return warm,cold,df_warm,df_cold
+
 def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     
     f,ax = plt.subplots(6,1,figsize=[15,30])
@@ -284,6 +372,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
 
     
     ### ATL3 ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_atl3)
     ax[0].axhline(0,color=color_lines)
     ax[0].axhline(1,color=color_lines,linestyle='--')
     ax[0].axhline(-1,color=color_lines,linestyle='--')
@@ -295,8 +384,21 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[0].xaxis.set_major_formatter(myFmt)
     ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_atl3.time.values,ssta_atl3,1,ssta_atl3>1,color='red')
-    ax[0].fill_between(ssta_atl3.time.values,ssta_atl3,-1,ssta_atl3<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[0].fill_between(ssta_atl3.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_atl3[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_atl3[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[0].fill_between(ssta_atl3.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_atl3[index_cold[0,i]:index_cold[1,i]],
+                             -1,ssta_atl3[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
+
+
+    
     ax[0].set_title('Normalized SST anomalies ATL3 [20$^{\circ}$W-0; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
                     str(ssta_atl3.time.values[0])[:7] +' --> '+
                     str(ssta_atl3.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
@@ -307,6 +409,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     
     
     ### ABA ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_aba)
     ax[1].set_title(
         'Normalized SST anomalies ABA [8$^{\circ}$E-16$^{\circ}$E; 20$^{\circ}$S-10$^{\circ}$S] | Baseline '+
                     str(ssta_aba.time.values[0])[:7] +' --> '+
@@ -325,15 +428,28 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[1].xaxis.set_major_formatter(myFmt)
     ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_aba.time.values,ssta_aba,1,ssta_aba>1,color='red')
-    ax[1].fill_between(ssta_aba.time.values,ssta_aba,-1,ssta_aba<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[1].fill_between(ssta_aba.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_aba[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_aba[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[1].fill_between(ssta_aba.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_aba[index_cold[0,i]:index_cold[1,i]],-1,
+                               ssta_aba[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
+
+
     ax[1].set_ylim([-3,3])
     
     ### NINO 3.4 ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_nino34)
     ax[3].set_title(
         'Normalized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
-                    str(ssta_aba.time.values[0])[:7] +' --> '+
-                    str(ssta_aba.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_nino34.time.values[0])[:7] +' --> '+
+                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
     ax[3].plot(ssta_nino34.time,ssta_nino34,color='black')
     ax[3].axhline(0,color=color_lines)
     ax[3].axhline(1,color=color_lines,linestyle='--')
@@ -348,11 +464,22 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[3].xaxis.set_major_formatter(myFmt)
     ax[3].tick_params(labelsize=ftz)
-    ax[3].fill_between(ssta_nino34.time.values,ssta_nino34,1,ssta_nino34>1,color='red')
-    ax[3].fill_between(ssta_nino34.time.values,ssta_nino34,-1,ssta_nino34<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[3].fill_between(ssta_nino34.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_nino34[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_nino34[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[3].fill_between(ssta_nino34.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_nino34[index_cold[0,i]:index_cold[1,i]],
+                             -1,ssta_nino34[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[3].set_ylim([-3,3])
     
     ### DNI ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_dni)
     ax[2].set_title(
         'Normalized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
                     str(ssta_dni.time.values[0])[:7] +' --> '+
@@ -371,11 +498,22 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[2].xaxis.set_major_formatter(myFmt)
     ax[2].tick_params(labelsize=ftz)
-    ax[2].fill_between(ssta_dni.time.values,ssta_dni,1,ssta_dni>1,color='red')
-    ax[2].fill_between(ssta_dni.time.values,ssta_dni,-1,ssta_dni<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[2].fill_between(ssta_dni.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_dni[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_dni[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[2].fill_between(ssta_dni.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_dni[index_cold[0,i]:index_cold[1,i]],
+                             -1,ssta_dni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[2].set_ylim([-3,3])
     
     ### CNI ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_cni)
     ax[4].set_title(
         'Normalized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
                     str(ssta_cni.time.values[0])[:7] +' --> '+
@@ -394,11 +532,22 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[4].xaxis.set_major_formatter(myFmt)
     ax[4].tick_params(labelsize=ftz)
-    ax[4].fill_between(ssta_cni.time.values,ssta_cni,1,ssta_cni>1,color='red')
-    ax[4].fill_between(ssta_cni.time.values,ssta_cni,-1,ssta_cni<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[4].fill_between(ssta_cni.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_cni[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_cni[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[4].fill_between(ssta_cni.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_cni[index_cold[0,i]:index_cold[1,i]],
+                             -1,ssta_cni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[4].set_ylim([-3,3])
     
     ### NNI ###
+    index_warm,index_cold,_,_ = create_table_event(ssta_nni)
     ax[5].set_title(
         'Normalized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
                     str(ssta_nni.time.values[0])[:7] +' --> '+
@@ -417,9 +566,20 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     myFmt = mdates.DateFormatter('%Y')
     ax[5].xaxis.set_major_formatter(myFmt)
     ax[5].tick_params(labelsize=ftz)
-    ax[5].fill_between(ssta_nni.time.values,ssta_nni,1,ssta_nni>1,color='red')
-    ax[5].fill_between(ssta_nni.time.values,ssta_nni,-1,ssta_nni<-1,color='blue')
+    for i in range(index_warm.shape[1]):
+        if index_warm[2,i]>=3:
+            ax[5].fill_between(ssta_nni.time.values[index_warm[0,i]:index_warm[1,i]],
+                     ssta_nni[index_warm[0,i]:index_warm[1,i]],1,
+                             ssta_nni[index_warm[0,i]:index_warm[1,i]]>1,color='red')
+
+
+    for i in range(index_cold.shape[1]):
+        if index_cold[2,i]>=3:
+            ax[5].fill_between(ssta_nni.time.values[index_cold[0,i]:index_cold[1,i]],
+                     ssta_nni[index_cold[0,i]:index_cold[1,i]],
+                             -1,ssta_nni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[5].set_ylim([-3,3])
+    
     
 def plot_anomalies_wk_aba(ssta_aba):
     
