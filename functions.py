@@ -20,6 +20,10 @@ date_time = now.strftime("%d/%m/%Y")
 import matplotlib
 import hvplot.pandas  # noqa
 import hvplot.xarray  # noqa
+def is_mam(month):
+    return (month >= 3) & (month <= 5)
+def is_jja(month):
+    return (month >= 6) & (month <= 8)
 def nandetrend(y):
     ''' Remove the linear trend from the data '''
     
@@ -359,8 +363,9 @@ def create_table_event(ssta):
                       )
     data_table_cold = np.vstack((ssta[cold[0,cold[2,:]>3]].time,
                            ssta[cold[1,cold[2,:]>3]].time))
+    
     df_cold = pd.DataFrame(data_table_cold.T, columns = ['Start date','End date'])
-        
+    
     return warm,cold,df_warm,df_cold
 
 def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
@@ -1541,6 +1546,7 @@ def read_compute_anomalies_uwind_plot(data):
            size=ftz,
            weight='bold')
     ax.set_ylim([-3,3])
+    return uwnda_atl4_norm
     
     
 def plot_slp(ncep_data_slp):
@@ -1582,4 +1588,83 @@ def plot_slp(ncep_data_slp):
     ax.xaxis.set_minor_locator(years_minor)
     myFmt = mdates.DateFormatter('%Y')
     ax.xaxis.set_major_formatter(myFmt)
+def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
+    uwnda_atl4_mam = uwnda_atl4.sel(time=is_mam(
+        uwnda_atl4['time.month'])).groupby('time.year').mean() 
 
+    ssta_atl3_jja = ssta_atl3.sel(time=is_jja(
+        ssta_atl3['time.month'])).groupby('time.year').mean() 
+
+    x = np.arange(-2.5,2.5,0.1)
+    m, b, r_val, p_val, std_err = stats.linregress(np.array(uwnda_atl4_mam),np.array(ssta_atl3_jja))
+    y = m*x+b
+    n_replicate = 10000
+    N = uwnda_atl4_mam.shape[0]
+
+    index = list(range(N))
+
+    result = []
+    #
+    for i in range(n_replicate):
+        ind_resample = np.random.choice(index, N)
+        result.append(stats.linregress(uwnda_atl4_mam[ind_resample],
+                                       ssta_atl3_jja[ind_resample])[:2]
+        )
+    #
+    result = np.array(result)
+    y_hat_distr = result[:, 0] * x[:, np.newaxis] + result[:, 1]
+    ci_forecast_uwnda_ssta = np.percentile(y_hat_distr, (2.5, 97.5), axis=-1)
+    f,ax = plt.subplots(1,1,figsize=[10,10])
+    ftz=15
+    ax.plot(x,y,color='blue',linewidth=3)
+    for i in range(uwnda_atl4_mam.shape[0]):
+        if np.logical_and(uwnda_atl4_mam[i]>0.5,ssta_atl3_jja[i]>0.5):
+             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='red',
+                        marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
+        elif np.logical_and(uwnda_atl4_mam[i]<-0.5,ssta_atl3_jja[i]<-0.5):
+             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='blue',
+                       marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
+
+        elif np.logical_and(uwnda_atl4_mam[i]<-0.5,ssta_atl3_jja[i]>0.5):
+             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
+                       marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
+        elif np.logical_and(uwnda_atl4_mam[i]>0.5,ssta_atl3_jja[i]<-0.5):
+             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
+                       marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
+
+        elif np.logical_and(uwnda_atl4_mam[i]<0.5,uwnda_atl4_mam[i]>-0.5):
+             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='grey',
+                       marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
+
+    ax.axhline(0,color='black')
+    ax.axhline(0.5,linestyle='--',color='black')
+    ax.axhline(-0.5,linestyle='--',color='black')
+    ax.axvline(0,color='black')
+    ax.axvline(0.5,linestyle='--',color='black')
+    ax.axvline(-0.5,linestyle='--',color='black')
+    ax.plot(x, ci_forecast_uwnda_ssta[0], 'grey')
+    ax.plot(x, ci_forecast_uwnda_ssta[1], 'grey')
+    ax.fill_between(x,y,ci_forecast_uwnda_ssta[0],color='grey',alpha=0.15)
+    ax.fill_between(x,y,ci_forecast_uwnda_ssta[1],color='grey',alpha=0.15)
+    ax.set_xlim([-2.1,2.1])
+    ax.set_ylim([-2,2])
+    ax.set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
+    ax.set_xlabel('ATL4-averaged MAM UWNDa',fontsize=ftz,fontweight='bold')
+    ax.tick_params(labelsize=ftz)
+    ax.text(1.15,1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax.text(-1.5,-1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax.text(1,-1.75,'Non-canonical',fontsize=ftz,fontweight='bold')
+    ax.text(-1.6,1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
+
+    textstr = '\n'.join((r'$s=%.2f$ $\pm$ %.2f' %
+                     (m, std_err),
+                     r'$R^{2}=%.2f$' % (r_val**2, ),
+                    'p-value < 0.05'))
+    props = dict(boxstyle='round', facecolor='white', ec='blue', lw=2)
+    ax.text(0.05,
+         0.6,
+         textstr,
+         transform=ax.transAxes,
+         fontsize=ftz-5,
+         verticalalignment='top',
+         bbox=props)
