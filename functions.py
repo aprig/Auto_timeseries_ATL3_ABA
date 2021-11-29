@@ -1591,6 +1591,8 @@ def plot_slp(ncep_data_slp):
 def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     uwnda_atl4_mam = uwnda_atl4.sel(time=is_mam(
         uwnda_atl4['time.month'])).groupby('time.year').mean() 
+    uwnda_atl4_jja = uwnda_atl4.sel(time=is_jja(
+        uwnda_atl4['time.month'])).groupby('time.year').mean() 
 
     ssta_atl3_jja = ssta_atl3.sel(time=is_jja(
         ssta_atl3['time.month'])).groupby('time.year').mean() 
@@ -1614,57 +1616,129 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     result = np.array(result)
     y_hat_distr = result[:, 0] * x[:, np.newaxis] + result[:, 1]
     ci_forecast_uwnda_ssta = np.percentile(y_hat_distr, (2.5, 97.5), axis=-1)
-    f,ax = plt.subplots(1,1,figsize=[10,10])
+    f,ax = plt.subplots(1,2,figsize=[20,10])
     ftz=15
-    ax.plot(x,y,color='blue',linewidth=3)
+    ax[0].plot(x,y,color='blue',linewidth=3)
     for i in range(uwnda_atl4_mam.shape[0]):
         if np.logical_and(uwnda_atl4_mam[i]>0.5,ssta_atl3_jja[i]>0.5):
-             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='red',
+             ax[0].scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='red',
                         marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
         elif np.logical_and(uwnda_atl4_mam[i]<-0.5,ssta_atl3_jja[i]<-0.5):
-             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='blue',
+             ax[0].scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='blue',
                        marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
 
         elif np.logical_and(uwnda_atl4_mam[i]<-0.5,ssta_atl3_jja[i]>0.5):
-             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
+             ax[0].scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
                        marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
         elif np.logical_and(uwnda_atl4_mam[i]>0.5,ssta_atl3_jja[i]<-0.5):
-             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
+             ax[0].scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='black',
                        marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
 
         elif np.logical_and(uwnda_atl4_mam[i]<0.5,uwnda_atl4_mam[i]>-0.5):
-             ax.scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='grey',
+             ax[0].scatter(uwnda_atl4_mam[i],ssta_atl3_jja[i],color='grey',
                        marker=r"${}$".format(uwnda_atl4_mam.year.values[i]),s=650)
 
-    ax.axhline(0,color='black')
-    ax.axhline(0.5,linestyle='--',color='black')
-    ax.axhline(-0.5,linestyle='--',color='black')
-    ax.axvline(0,color='black')
-    ax.axvline(0.5,linestyle='--',color='black')
-    ax.axvline(-0.5,linestyle='--',color='black')
-    ax.plot(x, ci_forecast_uwnda_ssta[0], 'grey')
-    ax.plot(x, ci_forecast_uwnda_ssta[1], 'grey')
-    ax.fill_between(x,y,ci_forecast_uwnda_ssta[0],color='grey',alpha=0.15)
-    ax.fill_between(x,y,ci_forecast_uwnda_ssta[1],color='grey',alpha=0.15)
-    ax.set_xlim([-2.1,2.1])
-    ax.set_ylim([-2,2])
-    ax.set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
-    ax.set_xlabel('ATL4-averaged MAM UWNDa',fontsize=ftz,fontweight='bold')
-    ax.tick_params(labelsize=ftz)
-    ax.text(1.15,1.75,'Canonical',fontsize=ftz,fontweight='bold')
-    ax.text(-1.5,-1.75,'Canonical',fontsize=ftz,fontweight='bold')
-    ax.text(1,-1.75,'Non-canonical',fontsize=ftz,fontweight='bold')
-    ax.text(-1.6,1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].axhline(0,color='black')
+    ax[0].axhline(0.5,linestyle='--',color='black')
+    ax[0].axhline(-0.5,linestyle='--',color='black')
+    ax[0].axvline(0,color='black')
+    ax[0].axvline(0.5,linestyle='--',color='black')
+    ax[0].axvline(-0.5,linestyle='--',color='black')
+    ax[0].plot(x, ci_forecast_uwnda_ssta[0], 'grey')
+    ax[0].plot(x, ci_forecast_uwnda_ssta[1], 'grey')
+    ax[0].fill_between(x,y,ci_forecast_uwnda_ssta[0],color='grey',alpha=0.15)
+    ax[0].fill_between(x,y,ci_forecast_uwnda_ssta[1],color='grey',alpha=0.15)
+    ax[0].set_xlim([-2.1,2.1])
+    ax[0].set_ylim([-2,2])
+    ax[0].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
+    ax[0].set_xlabel('ATL4-averaged MAM UWNDa',fontsize=ftz,fontweight='bold')
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].text(1.15,1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(-1.5,-1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(1,-1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(-1.6,1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
 
     textstr = '\n'.join((r'$s=%.2f$ $\pm$ %.2f' %
                      (m, std_err),
                      r'$R^{2}=%.2f$' % (r_val**2, ),
                     'p-value < 0.05'))
     props = dict(boxstyle='round', facecolor='white', ec='blue', lw=2)
-    ax.text(0.05,
+    ax[0].text(0.05,
          0.6,
          textstr,
-         transform=ax.transAxes,
+         transform=ax[0].transAxes,
+         fontsize=ftz-5,
+         verticalalignment='top',
+         bbox=props)
+    
+    
+    x = np.arange(-2.5,2.5,0.1)
+    m1, b1, r_val, p_val, std_err = stats.linregress(np.array(uwnda_atl4_jja),np.array(ssta_atl3_jja))
+    y1 = m1*x+b1
+    n_replicate = 10000
+    N = uwnda_atl4_jja.shape[0]
+
+    index = list(range(N))
+
+    result = []
+    #
+    for i in range(n_replicate):
+        ind_resample = np.random.choice(index, N)
+        result.append(stats.linregress(uwnda_atl4_jja[ind_resample],
+                                       ssta_atl3_jja[ind_resample])[:2]
+        )
+    #
+    result = np.array(result)
+    y_hat_distr = result[:, 0] * x[:, np.newaxis] + result[:, 1]
+    ci_forecast_uwnda_ssta_1 = np.percentile(y_hat_distr, (2.5, 97.5), axis=-1)
+    ax[1].plot(x,y1,color='blue',linewidth=3)
+    for i in range(uwnda_atl4_jja.shape[0]):
+        if np.logical_and(uwnda_atl4_jja[i]>0.5,ssta_atl3_jja[i]>0.5):
+             ax[1].scatter(uwnda_atl4_jja[i],ssta_atl3_jja[i],color='red',
+                        marker=r"${}$".format(uwnda_atl4_jja.year.values[i]),s=650)
+        elif np.logical_and(uwnda_atl4_jja[i]<-0.5,ssta_atl3_jja[i]<-0.5):
+             ax[1].scatter(uwnda_atl4_jja[i],ssta_atl3_jja[i],color='blue',
+                       marker=r"${}$".format(uwnda_atl4_jja.year.values[i]),s=650)
+
+        elif np.logical_and(uwnda_atl4_jja[i]<-0.5,ssta_atl3_jja[i]>0.5):
+             ax[1].scatter(uwnda_atl4_jja[i],ssta_atl3_jja[i],color='black',
+                       marker=r"${}$".format(uwnda_atl4_jja.year.values[i]),s=650)
+        elif np.logical_and(uwnda_atl4_jja[i]>0.5,ssta_atl3_jja[i]<-0.5):
+             ax[1].scatter(uwnda_atl4_jja[i],ssta_atl3_jja[i],color='black',
+                       marker=r"${}$".format(uwnda_atl4_jja.year.values[i]),s=650)
+
+        elif np.logical_and(uwnda_atl4_jja[i]<0.5,uwnda_atl4_jja[i]>-0.5):
+             ax[1].scatter(uwnda_atl4_jja[i],ssta_atl3_jja[i],color='grey',
+                       marker=r"${}$".format(uwnda_atl4_jja.year.values[i]),s=650)
+
+    ax[1].axhline(0,color='black')
+    ax[1].axhline(0.5,linestyle='--',color='black')
+    ax[1].axhline(-0.5,linestyle='--',color='black')
+    ax[1].axvline(0,color='black')
+    ax[1].axvline(0.5,linestyle='--',color='black')
+    ax[1].axvline(-0.5,linestyle='--',color='black')
+    ax[1].plot(x, ci_forecast_uwnda_ssta_1[0], 'grey')
+    ax[1].plot(x, ci_forecast_uwnda_ssta_1[1], 'grey')
+    ax[1].fill_between(x,y1,ci_forecast_uwnda_ssta_1[0],color='grey',alpha=0.15)
+    ax[1].fill_between(x,y1,ci_forecast_uwnda_ssta_1[1],color='grey',alpha=0.15)
+    ax[1].set_xlim([-2.1,2.1])
+    ax[1].set_ylim([-2,2])
+    ax[1].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
+    ax[1].set_xlabel('ATL4-averaged JJA UWNDa',fontsize=ftz,fontweight='bold')
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].text(1.15,1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(-1.5,-1.75,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(1,-1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(-1.6,1.75,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    textstr = '\n'.join((r'$s=%.2f$ $\pm$ %.2f' %
+                     (m1, std_err),
+                     r'$R^{2}=%.2f$' % (r_val**2, ),
+                    'p-value < 0.05'))
+    props = dict(boxstyle='round', facecolor='white', ec='blue', lw=2)
+    ax[1].text(0.05,
+         0.6,
+         textstr,
+         transform=ax[1].transAxes,
          fontsize=ftz-5,
          verticalalignment='top',
          bbox=props)
