@@ -243,6 +243,11 @@ def read_data_compute_anomalies_oi(path_data):
                            (sst.lat<=30) & (sst.lat>=20),drop=True).mean(dim='lon').mean(dim='lat')
     sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
                            (sst.lat<=-22) & (sst.lat>=-28),drop=True).mean(dim='lon').mean(dim='lat')
+    sst_iod_w = sst.where((  sst.lon>=50) & (sst.lon<=70) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True).mean(dim='lon').mean(dim='lat')
+    
+    sst_iod_e = sst.where((  sst.lon>=90) & (sst.lon<=110) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True).mean(dim='lon').mean(dim='lat')
     
    
     ## Linearly detrend the data ## 
@@ -252,6 +257,8 @@ def read_data_compute_anomalies_oi(path_data):
     sst_dni = sst_dni.assign_coords(sst_dtd=('time',  nandetrend(sst_dni.values)))
     sst_cni = sst_cni.assign_coords(sst_dtd=('time',  nandetrend(sst_cni.values)))
     sst_nni = sst_nni.assign_coords(sst_dtd=('time',  nandetrend(sst_nni.values)))
+    sst_iod_w = sst_iod_w.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_w.values)))
+    sst_iod_e = sst_iod_e.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_e.values)))
 
     ## Compute the SST anomalies ## 
 
@@ -262,9 +269,12 @@ def read_data_compute_anomalies_oi(path_data):
     ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
     ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
     ssta_nni,ssta_nni_norm = ano_norm_t(sst_nni.sst_dtd.load())
+    ssta_iod_w,ssta_iod_w_norm = ano_norm_t(sst_iod_w.sst_dtd.load())
+    ssta_iod_e,ssta_iod_e_norm = ano_norm_t(sst_iod_e.sst_dtd.load())
     
+    iod_index = ssta_iod_w - ssta_iod_e
     
-    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
+    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm,iod_index
 
 
 def read_data_compute_anomalies(path_data):
@@ -1742,3 +1752,27 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
          fontsize=ftz-5,
          verticalalignment='top',
          bbox=props)
+def plot_IOD(iod_index):
+    f,ax = plt.subplots(1,1,figsize=[15,5])
+    ftz=15
+    ax.plot(iod_index.time,iod_index,color='black')
+    ax.axhline(iod_index.std(dim='time'),color='black',linestyle='--')
+    ax.axhline(-iod_index.std(dim='time'),color='black',linestyle='--')
+    ax.axhline(0,color='black')
+    ax.fill_between(iod_index.time.values,iod_index,iod_index.std(dim='time'),
+                    iod_index>iod_index.std(dim='time'),color='red')
+    ax.fill_between(iod_index.time.values,iod_index,-iod_index.std(dim='time'),
+                    iod_index<-iod_index.std(dim='time'),color='blue')
+    ax.tick_params(labelsize=ftz)
+    ax.set_title('IOD index',fontsize=ftz,fontweight='bold')
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+           size=ftz,
+           weight='bold')
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.set_ylim([-1.5,1.5])
+    ax.set_ylabel('[$^{\circ}$C]',fontsize=ftz)
