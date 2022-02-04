@@ -33,6 +33,7 @@ jobs:
           sudo apt-get install libgeos++-dev
           sudo apt-get install libproj-dev
           python3 -m pip install --upgrade pip
+          pip install proj geos
           pip install shapely  --no-binary shapely shapely
           pip  install cartopy --no-binary cartopy
           pip3 install -r ./requirements.txt
