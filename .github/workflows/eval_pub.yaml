@@ -32,12 +32,8 @@ jobs:
         run: |
           sudo apt-get install libgeos++-dev
           sudo apt-get install libproj-dev
-          sudo apt install libgeos++-dev libgeos-3.8.0 libgeos-c1v5 libgeos-dev libgeos-doc
           python3 -m pip install --upgrade pip
-          pip install shapely  --no-binary shapely
-          pip  install cartopy --no-binary cartopy
           pip3 install -r ./requirements.txt
-          pip install geoplot
           python3 -m ipykernel install --user --name python3
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
@@ -48,9 +44,9 @@ jobs:
         if: ${{ always() }}
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_atlantic.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
+          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_atlantic.ipynb  --output-dir='./ci_out' --to html
+          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
+          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
       
       - name: Upload notebook
         uses: actions/upload-artifact@v1
