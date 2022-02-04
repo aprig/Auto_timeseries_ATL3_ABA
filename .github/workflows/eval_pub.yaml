@@ -50,9 +50,9 @@ jobs:
         if: ${{ always() }}
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
-          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_atlantic.ipynb  --output-dir='./ci_out' --to html
-          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
-          #jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
+          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_atlantic.ipynb  --output-dir='./ci_out' --to html
+          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
+          jupyter nbconvert --ExecutePreprocessor.timeout=600 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
       
       - name: Upload notebook
         uses: actions/upload-artifact@v1
