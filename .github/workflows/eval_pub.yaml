@@ -32,6 +32,8 @@ jobs:
         run: |
           sudo apt-get install libgeos++-dev
           sudo apt-get install libproj-dev
+          sudo apt-get install python-software-properties
+          sudo add-apt-repository ppa:ubuntugis/ppa
           sudo apt-get install geos
           python3 -m pip install --upgrade pip
           pip install shapely  --no-binary shapely
