@@ -35,7 +35,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install geos
           pip install shapely  --no-binary shapely 
-          pip3  install Cartopy
+          pip  install cartopy --no-binary cartopy
           pip3 install -r ./requirements.txt
           pip install geoplot
           python3 -m ipykernel install --user --name python3
