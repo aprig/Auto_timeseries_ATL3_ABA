@@ -34,7 +34,8 @@ jobs:
           sudo apt-get install libproj-dev
           python3 -m pip install --upgrade pip
           pip install geos
-          pip install shapely cartopy --no-binary shapely --no-binary cartopy
+          pip install shapely  --no-binary shapely 
+          pip  install cartopy
           pip3 install -r ./requirements.txt
           pip install geoplot
           python3 -m ipykernel install --user --name python3
