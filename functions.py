@@ -12,14 +12,14 @@ import scipy.stats as stats
 from datetime import *
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-import cartopy.crs as ccrs
-import cartopy
+#import cartopy.crs as ccrs
+#import cartopy
 import matplotlib.patches as mpatches
 now = datetime.now()
 date_time = now.strftime("%d/%m/%Y")
 import matplotlib
-import hvplot.pandas  # noqa
-import hvplot.xarray  # noqa
+#import hvplot.pandas  # noqa
+#import hvplot.xarray  # noqa
 def is_mam(month):
     return (month >= 3) & (month <= 5)
 def is_jja(month):
