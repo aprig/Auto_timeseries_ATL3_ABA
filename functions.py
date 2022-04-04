@@ -12,8 +12,8 @@ import scipy.stats as stats
 from datetime import *
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-import cartopy.crs as ccrs
-import cartopy
+#import cartopy.crs as ccrs
+#import cartopy
 import matplotlib.patches as mpatches
 now = datetime.now()
 date_time = now.strftime("%d/%m/%Y")
@@ -931,8 +931,8 @@ def plot_anomalies_wk_cni(ssta_cni):
     ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,-1,ssta_cni_2<-1,color='blue')
     ax[1].set_ylim([-3,3]) 
     
-import cartopy.crs as ccrs
-import cartopy    
+#import cartopy.crs as ccrs
+#import cartopy    
 import matplotlib.patches as mpatches
 
 
