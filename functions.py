@@ -1783,3 +1783,131 @@ def plot_IOD(iod_index):
     ax.xaxis.set_major_formatter(myFmt)
     ax.set_ylim([-1.5,1.5])
     ax.set_ylabel('[$^{\circ}$C]',fontsize=ftz)
+    
+    
+    
+def plot_daily_trop_map(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
+    import matplotlib.gridspec as gridspec
+    import matplotlib.patches as mpatches
+    fig = plt.figure(figsize=[25, 15])
+    ftz=15
+    import matplotlib
+    bounds = np.arange(24,30,0.5)
+
+    gs = gridspec.GridSpec(2, 4)
+    ax0 = fig.add_subplot(gs[:, :2])
+    ax1 = fig.add_subplot(gs[0, 2])
+    ax2 = fig.add_subplot(gs[1, 2])
+
+
+
+    bounds = [15,20,25,27,28,29,30,35]
+    ftz=15
+    ax0.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
+    cmap1=plt.cm.RdYlBu_r
+
+
+
+    p0 = ax0.pcolor(sst_trop_atlantic.lon,sst_trop_atlantic.lat,sst_trop_atlantic,vmin=24,vmax=30,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax=ax0)
+    cbar.ax.tick_params(labelsize=ftz)
+    cs1 = ax0.contour(sst_trop_atlantic.lon,sst_trop_atlantic.lat,sst_trop_atlantic,levels=bounds,colors='black')
+    ax0.clabel(cs1, inline=1, fontsize=ftz)
+    ax0.tick_params(labelsize=ftz)
+    ax0.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax0.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax0.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
+    ax0.axhline(0,linewidth=3,color='black',alpha=0.5)
+    ax0.add_patch(mpatches.Rectangle(xy=[-50, -5], width=70, height=10,edgecolor='grey',fill=None,
+                                        alpha=1,linewidth=4))
+    ax0.add_patch(mpatches.Rectangle(xy=[5, -45], width=20, height=55,edgecolor='grey',fill=None,
+                                        alpha=1,linewidth=4))
+
+    p0 = ax1.pcolor(sst_eq_atlantic.lon,sst_eq_atlantic.lat,sst_eq_atlantic,vmin=24,vmax=30,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax = ax1)
+    cbar.ax.tick_params(labelsize=ftz)
+    cs1 = ax1.contour(sst_eq_atlantic.lon,sst_eq_atlantic.lat,sst_eq_atlantic,levels=bounds,colors='black')
+    ax1.clabel(cs1, inline=1, fontsize=ftz)
+    ax1.tick_params(labelsize=ftz)
+    ax1.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax1.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax1.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
+    ax1.axhline(0,linewidth=3,color='black',alpha=0.5)
+
+
+    p0 = ax2.pcolor(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,vmin=14,vmax=25,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax = ax2)
+    cbar.ax.tick_params(labelsize=ftz)
+    cs1 = ax2.contour(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,levels=[15,18,20,22],colors='black')
+    ax2.clabel(cs1, inline=1, fontsize=ftz)
+    ax2.tick_params(labelsize=ftz)
+    ax2.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax2.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax2.set_title(str(sst_af_atlantic.time.values)[:10],fontsize=ftz) 
+    ax2.axhline(0,linewidth=3,color='black',alpha=0.5)
+    
+    
+    
+    
+    
+def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
+    import matplotlib.gridspec as gridspec
+    import matplotlib.patches as mpatches
+    fig = plt.figure(figsize=[25, 15])
+    ftz=15
+    import matplotlib
+    bounds = np.arange(24,30,0.5)
+
+    gs = gridspec.GridSpec(2, 4)
+    ax0 = fig.add_subplot(gs[:, :2])
+    ax1 = fig.add_subplot(gs[0, 2])
+    ax2 = fig.add_subplot(gs[1, 2])
+
+
+
+    bounds = [15,20,25,27,28,29,30,35]
+    ftz=15
+    ax0.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
+    cmap1=plt.cm.RdYlBu_r
+
+
+
+    p0 = ax0.pcolor(sst_trop_atlantic.lon,sst_trop_atlantic.lat,sst_trop_atlantic,vmin=-2,vmax=2,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax=ax0)
+    cbar.ax.tick_params(labelsize=ftz)
+    cs1 = ax0.contour(sst_trop_atlantic.lon,sst_trop_atlantic.lat,sst_trop_atlantic,levels=bounds,colors='black')
+    ax0.clabel(cs1, inline=1, fontsize=ftz)
+    ax0.tick_params(labelsize=ftz)
+    ax0.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax0.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax0.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
+    ax0.axhline(0,linewidth=3,color='black',alpha=0.5)
+    ax0.add_patch(mpatches.Rectangle(xy=[-50, -5], width=70, height=10,edgecolor='grey',fill=None,
+                                        alpha=1,linewidth=4))
+    ax0.add_patch(mpatches.Rectangle(xy=[5, -45], width=20, height=55,edgecolor='grey',fill=None,
+                                        alpha=1,linewidth=4))
+
+    p0 = ax1.pcolor(sst_eq_atlantic.lon,sst_eq_atlantic.lat,sst_eq_atlantic,vmin=-2,vmax=2,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax = ax1)
+    cbar.ax.tick_params(labelsize=ftz)
+    cs1 = ax1.contour(sst_eq_atlantic.lon,sst_eq_atlantic.lat,sst_eq_atlantic,levels=bounds,colors='black')
+    ax1.clabel(cs1, inline=1, fontsize=ftz)
+    ax1.tick_params(labelsize=ftz)
+    ax1.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax1.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax1.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
+    ax1.axhline(0,linewidth=3,color='black',alpha=0.5)
+
+
+    p0 = ax2.pcolor(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,vmin=-2,vmax=2,cmap=cmap1)
+    cbar=plt.colorbar(p0,ax = ax2)
+    cbar.ax.tick_params(labelsize=ftz)
+    #cs1 = ax2.contour(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,levels=[15,18,20,22],colors='black')
+    ax2.clabel(cs1, inline=1, fontsize=ftz)
+    ax2.tick_params(labelsize=ftz)
+    ax2.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax2.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax2.set_title(str(sst_af_atlantic.time.values)[:10],fontsize=ftz) 
+    ax2.axhline(0,linewidth=3,color='black',alpha=0.5)
