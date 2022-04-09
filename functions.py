@@ -1837,7 +1837,8 @@ def plot_daily_trop_map(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     ax1.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
     ax1.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
     ax1.axhline(0,linewidth=3,color='black',alpha=0.5)
-
+    ax1.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
 
     p0 = ax2.pcolor(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,vmin=14,vmax=25,cmap=cmap1)
     cbar=plt.colorbar(p0,ax = ax2)
@@ -1849,7 +1850,8 @@ def plot_daily_trop_map(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     ax2.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
     ax2.set_title(str(sst_af_atlantic.time.values)[:10],fontsize=ftz) 
     ax2.axhline(0,linewidth=3,color='black',alpha=0.5)
-    
+    ax2.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
     
     
     
@@ -1903,7 +1905,8 @@ def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     ax1.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
     ax1.set_title(str(sst_trop_atlantic.time.values)[:10],fontsize=ftz) 
     ax1.axhline(0,linewidth=3,color='black',alpha=0.5)
-
+    ax1.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
 
     p0 = ax2.pcolor(sst_af_atlantic.lon,sst_af_atlantic.lat,sst_af_atlantic,vmin=-2,vmax=2,cmap=cmap1)
     cbar=plt.colorbar(p0,ax = ax2)
@@ -1915,3 +1918,5 @@ def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     ax2.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
     ax2.set_title(str(sst_af_atlantic.time.values)[:10],fontsize=ftz) 
     ax2.axhline(0,linewidth=3,color='black',alpha=0.5)
+    ax2.tick_params(labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+                         bottom=True, top=True, left=True, right=True,length=10,direction='in')
