@@ -1789,15 +1789,18 @@ def plot_IOD(iod_index):
 def plot_daily_trop_map(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     import matplotlib.gridspec as gridspec
     import matplotlib.patches as mpatches
-    fig = plt.figure(figsize=[25, 15])
+    fig = plt.figure(figsize=[20, 15])
     ftz=15
     import matplotlib
     bounds = np.arange(24,30,0.5)
 
-    gs = gridspec.GridSpec(2, 4)
-    ax0 = fig.add_subplot(gs[:, :2])
-    ax1 = fig.add_subplot(gs[0, 2])
-    ax2 = fig.add_subplot(gs[1, 2])
+    gs = gridspec.GridSpec(3, 4)
+    ax0 = fig.add_subplot(gs[:2, :2])
+    ax2 = fig.add_subplot(gs[:2, 2])
+    ax1 = fig.add_subplot(gs[2, :])
+
+    plt.subplots_adjust(hspace=0.3,
+                    wspace=0.3)
 
 
 
@@ -1854,17 +1857,18 @@ def plot_daily_trop_map(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
 def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
     import matplotlib.gridspec as gridspec
     import matplotlib.patches as mpatches
-    fig = plt.figure(figsize=[25, 15])
+    fig = plt.figure(figsize=[20, 15])
     ftz=15
     import matplotlib
     bounds = np.arange(24,30,0.5)
 
-    gs = gridspec.GridSpec(2, 4)
-    ax0 = fig.add_subplot(gs[:, :2])
-    ax1 = fig.add_subplot(gs[0, 2])
-    ax2 = fig.add_subplot(gs[1, 2])
+    gs = gridspec.GridSpec(3, 4)
+    ax0 = fig.add_subplot(gs[:2, :2])
+    ax2 = fig.add_subplot(gs[:2, 2])
+    ax1 = fig.add_subplot(gs[2, :])
 
-
+    plt.subplots_adjust(hspace=0.3,
+                    wspace=0.3)
 
     bounds = [15,20,25,27,28,29,30,35]
     ftz=15
