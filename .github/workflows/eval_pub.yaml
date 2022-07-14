@@ -56,7 +56,7 @@ jobs:
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=950 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
           jupyter nbconvert --ExecutePreprocessor.timeout=950 --execute make_map_tropical_atlantic_daily_anom.ipynb  --output-dir='./ci_out' --to html
-        # jupyter nbconvert --ExecutePreprocessor.timeout=950 --execute plot_daily_sla_NRT.ipynb  --output-dir='./ci_out' --to html
+          jupyter nbconvert --ExecutePreprocessor.timeout=950 --execute plot_daily_sla_NRT.ipynb  --output-dir='./ci_out' --to html
         #  jupyter nbconvert --ExecutePreprocessor.timeout=900 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
         #  jupyter nbconvert --ExecutePreprocessor.timeout=900 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
       
