@@ -46,6 +46,7 @@ jobs:
           pip3 install -r ./requirements.txt
           python3 -m ipykernel install --user --name python3
           python3 -m pip install -I jinja2==3.0.3
+          conda install -c conda-forge pydap
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
         if: ${{ always() }}
