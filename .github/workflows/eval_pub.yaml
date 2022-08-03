@@ -46,7 +46,6 @@ jobs:
           pip3 install -r ./requirements.txt
           python3 -m ipykernel install --user --name python3
           python3 -m pip install -I jinja2==3.0.3
-          conda install -c conda-forge pydap
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
         if: ${{ always() }}
@@ -57,7 +56,7 @@ jobs:
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
           jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute make_map_tropical_atlantic_daily_anom.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute plot_daily_sla_NRT.ipynb  --output-dir='./ci_out' --to html
+        #  jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute plot_daily_sla_NRT.ipynb  --output-dir='./ci_out' --to html
         #  jupyter nbconvert --ExecutePreprocessor.timeout=900 --execute make_map_tropical_pacific.ipynb  --output-dir='./ci_out' --to html
         #  jupyter nbconvert --ExecutePreprocessor.timeout=900 --execute make_map_tropical_indian.ipynb  --output-dir='./ci_out' --to html
       
