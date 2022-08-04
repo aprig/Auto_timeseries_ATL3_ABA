@@ -2024,3 +2024,30 @@ def plot_pirata_temp(temp_23w,temp_10w,temp_0w):
                 fontsize=16,
                 horizontalalignment='right', verticalalignment='top')
     
+    
+    
+    
+def read_and_plot_sla(path_data):
+    ds = xr.open_dataset(path_data+'rads_global_nrt_sla_latest.nc',engine='pydap')
+    ds_sub = ds.where((ds.latitude>50)&(ds.latitude<65)&(ds.longitude>-65)&(ds.longitude<-35),drop=True)
+    f,ax = plt.subplots(1,1,figsize=[15,15])
+    ftz=15
+    cmap = plt.cm.bwr
+    bounds= np.arange(-0.2,0.22,0.02)
+    bounds1= [-0.2,-0.14,-0.1,-0.06,0.06,0.1,0.14,0.2]
+    ax.set_title(str(ds_sub.time.values[0])[:10],fontsize=ftz)
+    cs1 = ax.contour(ds_sub.longitude,ds_sub.latitude,ds_sub.sla[0,:,:],colors='black',levels=bounds1,extend='both')
+    p1 = ax.contourf(ds_sub.longitude,ds_sub.latitude,ds_sub.sla[0,:,:],cmap=cmap,levels=bounds,extend='both')
+
+    cbar = plt.colorbar(p1)
+    cbar.ax.tick_params(labelsize=ftz)
+    ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax.tick_params(labelsize=ftz)
+    ax.clabel(cs1, inline=1, fontsize=ftz-5)
+
+    cbar.set_label(r' SLA (m)', size=ftz)
+    ax.text(0.45,0.95,'Updated '+date_time,transform=ax.transAxes,
+               size=ftz,
+               weight='bold')
+    
