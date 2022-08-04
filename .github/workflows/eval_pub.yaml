@@ -44,7 +44,7 @@ jobs:
 
           python3 -m pip install --upgrade pip
           pip3 install -r ./requirements.txt
-          pip install Pydap[server,handlers.netcdf]
+          conda install -c conda-forge pydap 
           python3 -m ipykernel install --user --name python3
           python3 -m pip install -I jinja2==3.0.3
           sudo chmod -R 777 .
