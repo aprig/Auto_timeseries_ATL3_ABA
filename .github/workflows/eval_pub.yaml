@@ -43,6 +43,7 @@ jobs:
             poppler-utils
 
           python3 -m pip install --upgrade pip
+          pip install pydap
           pip3 install -r ./requirements.txt
           python3 -m ipykernel install --user --name python3
           python3 -m pip install -I jinja2==3.0.3
