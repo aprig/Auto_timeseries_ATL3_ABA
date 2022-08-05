@@ -39,7 +39,9 @@ jobs:
             fontconfig    \
             imagemagick   \
             libgeos++-dev \
-            libproj-dev   \
+            libproj-dev   \ 
+            proj-data \ 
+            proj-bin \  
             poppler-utils
 
           python3 -m pip install --upgrade pip
