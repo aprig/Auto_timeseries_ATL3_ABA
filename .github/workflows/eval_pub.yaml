@@ -40,9 +40,8 @@ jobs:
             imagemagick   \
             libgeos++-dev \
             libproj-dev   \ 
-            proj-data \ 
-            proj-bin \  
             poppler-utils
+          sudo apt install python3-dev proj-data proj-bin
 
           python3 -m pip install --upgrade pip
           pip3 install -r ./requirements.txt
