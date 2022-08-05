@@ -1928,7 +1928,8 @@ def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
 
 def read_pirata_temp(path_data):
 
-
+    ds_35w = xr.open_dataset(path_data+'OS_0n35w_199801_M_TVSM_dy.nc',engine='pydap')
+    temp_35w= ds_35w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
 
     ds_23w = xr.open_dataset(path_data+'OS_0n23w_199903_M_TVSM_dy.nc',
                          engine='pydap')
@@ -1943,14 +1944,14 @@ def read_pirata_temp(path_data):
                          engine='pydap')
     temp_0w= ds_0w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
     
-    return temp_23w,temp_10w,temp_0w
+    return temp_35w,temp_23w,temp_10w,temp_0w
 
-def plot_pirata_temp(temp_23w,temp_10w,temp_0w):
-    f,ax = plt.subplots(3,1,figsize=[15,15],sharex=True,sharey=True)
+def plot_pirata_temp(temp_35w,temp_23w,temp_10w,temp_0w):
+    f,ax = plt.subplots(4,1,figsize=[15,15],sharex=True,sharey=True)
     ax=ax.ravel()
     ftz=15
-    ax[0].plot(temp_23w.TIME[:],temp_23w[:],color='red')
-    ax[0].set_title('PIRATA 23$^{\circ}$W  1 m depth temperature',fontsize=ftz)
+    ax[0].plot(temp_35w.TIME[:],temp_35w[:],color='grey')
+    ax[0].set_title('PIRATA 35$^{\circ}$W  1 m depth temperature',fontsize=ftz)
     ax[0].set_ylabel('Temperature ($^{\circ}$C)',fontsize=ftz)
     ax[0].tick_params(labelsize=ftz)
     ax[0].spines['right'].set_visible(False)
@@ -1963,16 +1964,20 @@ def plot_pirata_temp(temp_23w,temp_10w,temp_0w):
     myFmt = mdates.DateFormatter('%Y')
     ax[0].xaxis.set_major_formatter(myFmt)
 
-    ax[0].annotate(str(temp_23w.TIME.values[-1])[:10]+' temperature ='+str(temp_23w.values[-1])+' $^{\circ}$C',
-                   (temp_23w.TIME.values[-1],
-                                                                              temp_23w.values[-1]),
+    ax[0].annotate(str(temp_35w.TIME.values[-1])[:10]+' temperature ='+str(temp_35w.values[-1])+' $^{\circ}$C',
+                   (temp_35w.TIME.values[-1],
+                                                                              temp_35w.values[-1]),
                    xytext=(0.5, .2), textcoords='axes fraction',
                 arrowprops=dict(facecolor='black', shrink=0.01),
                 fontsize=16,
                 horizontalalignment='right', verticalalignment='top')
-
-    ax[1].plot(temp_10w.TIME[:],temp_10w[:],color='blue')
-    ax[1].set_title('PIRATA 10$^{\circ}$W  1 m depth temperature',fontsize=ftz)
+    
+    
+    
+    
+    
+    ax[1].plot(temp_23w.TIME[:],temp_23w[:],color='red')
+    ax[1].set_title('PIRATA 23$^{\circ}$W  1 m depth temperature',fontsize=ftz)
     ax[1].set_ylabel('Temperature ($^{\circ}$C)',fontsize=ftz)
     ax[1].tick_params(labelsize=ftz)
     ax[1].spines['right'].set_visible(False)
@@ -1985,7 +1990,29 @@ def plot_pirata_temp(temp_23w,temp_10w,temp_0w):
     myFmt = mdates.DateFormatter('%Y')
     ax[1].xaxis.set_major_formatter(myFmt)
 
-    ax[1].annotate(str(temp_10w.TIME.values[-1])[:10]+' temperature ='+str(temp_10w.values[-1])+' $^{\circ}$C',
+    ax[1].annotate(str(temp_23w.TIME.values[-1])[:10]+' temperature ='+str(temp_23w.values[-1])+' $^{\circ}$C',
+                   (temp_23w.TIME.values[-1],
+                                                                              temp_23w.values[-1]),
+                   xytext=(0.5, .2), textcoords='axes fraction',
+                arrowprops=dict(facecolor='black', shrink=0.01),
+                fontsize=16,
+                horizontalalignment='right', verticalalignment='top')
+
+    ax[2].plot(temp_10w.TIME[:],temp_10w[:],color='blue')
+    ax[2].set_title('PIRATA 10$^{\circ}$W  1 m depth temperature',fontsize=ftz)
+    ax[2].set_ylabel('Temperature ($^{\circ}$C)',fontsize=ftz)
+    ax[2].tick_params(labelsize=ftz)
+    ax[2].spines['right'].set_visible(False)
+    ax[2].spines['top'].set_visible(False)
+
+    years = mdates.YearLocator(5)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax[2].xaxis.set_major_locator(years)
+    ax[2].xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax[2].xaxis.set_major_formatter(myFmt)
+
+    ax[2].annotate(str(temp_10w.TIME.values[-1])[:10]+' temperature ='+str(temp_10w.values[-1])+' $^{\circ}$C',
                    (temp_10w.TIME.values[-1],
                                                                               temp_10w.values[-1]),
                    xytext=(0.5, .1), textcoords='axes fraction',
@@ -1996,27 +2023,27 @@ def plot_pirata_temp(temp_23w,temp_10w,temp_0w):
 
 
 
-    ax[2].plot(temp_0w.TIME[:],temp_0w[:],color='green')
-    ax[2].set_title('PIRATA 0$^{\circ}$E  1 m depth temperature',fontsize=ftz)
-    ax[2].set_ylabel('Temperature ($^{\circ}$C)',fontsize=ftz)
-    ax[2].tick_params(labelsize=ftz)
+    ax[3].plot(temp_0w.TIME[:],temp_0w[:],color='green')
+    ax[3].set_title('PIRATA 0$^{\circ}$E  1 m depth temperature',fontsize=ftz)
+    ax[3].set_ylabel('Temperature ($^{\circ}$C)',fontsize=ftz)
+    ax[3].tick_params(labelsize=ftz)
 
-    ax[2].spines['right'].set_visible(False)
-    ax[2].spines['top'].set_visible(False)
+    ax[3].spines['right'].set_visible(False)
+    ax[3].spines['top'].set_visible(False)
 
 
     years = mdates.YearLocator(5)   # every 5 years
     years_minor = mdates.YearLocator(1)  # every year
-    ax[2].xaxis.set_major_locator(years)
-    ax[2].xaxis.set_minor_locator(years_minor)
+    ax[3].xaxis.set_major_locator(years)
+    ax[3].xaxis.set_minor_locator(years_minor)
     myFmt = mdates.DateFormatter('%Y')
-    ax[2].xaxis.set_major_formatter(myFmt)
-    ax[2].text(0.01,0.04,'Updated '+date_time,transform=ax[2].transAxes,
+    ax[3].xaxis.set_major_formatter(myFmt)
+    ax[3].text(0.01,0.04,'Updated '+date_time,transform=ax[3].transAxes,
                size=ftz,
                weight='bold')
 
 
-    ax[2].annotate(str(temp_0w.TIME.values[-1])[:10]+' temperature ='+str(temp_0w.values[-1])+' $^{\circ}$C',
+    ax[3].annotate(str(temp_0w.TIME.values[-1])[:10]+' temperature ='+str(temp_0w.values[-1])+' $^{\circ}$C',
                    (temp_0w.TIME.values[-1],
                                                                               temp_0w.values[-1]),
                    xytext=(0.7, .1), textcoords='axes fraction',
@@ -2043,6 +2070,8 @@ def read_and_plot_sla(path_data):
     cbar.ax.tick_params(labelsize=ftz)
     ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
     ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax.set_yticks(np.arange(50,66,2))
+    ax.set_xticks(np.arange(-65,-35,2))
     ax.tick_params(labelsize=ftz)
     ax.clabel(cs1, inline=1, fontsize=ftz-5)
 
