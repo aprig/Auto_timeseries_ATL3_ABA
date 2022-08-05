@@ -36,6 +36,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install proj-bin
+          sudo apt-get install geos
 
           python3 -m pip install --upgrade pip
           pip3 install -r ./requirements.txt
