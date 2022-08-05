@@ -2070,7 +2070,7 @@ def read_and_plot_sla(path_data):
     cbar.ax.tick_params(labelsize=ftz)
     ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
     ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
-    ax.set_yticks(np.arange(48,64,2))
+    ax.set_yticks(np.arange(46,64,2))
     ax.set_xticks(np.arange(-65,-35,2))
     ax.tick_params(labelsize=ftz)
     ax.clabel(cs1, inline=1, fontsize=ftz-5)
@@ -2090,7 +2090,7 @@ def read_and_plot_sst_labrador(path_data,now):
     ds = xr.concat([ds[:, :, 180:], ds[:, :, :180]], dim='lon')
     ds.coords['lon'] = (ds.coords['lon'] + 180) % 360 - 180
     
-    ds_sub = ds.where((ds.lat>48)&(ds.lat<62)&(ds.lon>-65)&(ds.lon<-35),drop=True)
+    ds_sub = ds.where((ds.lat>46)&(ds.lat<62)&(ds.lon>-65)&(ds.lon<-35),drop=True)
     f,ax = plt.subplots(1,1,figsize=[15,15])
     ftz=15
     cmap = plt.cm.RdYlBu_r
@@ -2103,7 +2103,7 @@ def read_and_plot_sst_labrador(path_data,now):
     cbar.ax.tick_params(labelsize=ftz)
     ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
     ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
-    ax.set_yticks(np.arange(48,64,2))
+    ax.set_yticks(np.arange(46,64,2))
     ax.set_xticks(np.arange(-65,-35,2))
     ax.tick_params(labelsize=ftz)
     ax.clabel(cs1, inline=1, fontsize=ftz-5)
