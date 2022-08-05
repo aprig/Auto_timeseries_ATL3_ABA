@@ -20,6 +20,12 @@ date_time = now.strftime("%d/%m/%Y")
 import matplotlib
 import hvplot.pandas  # noqa
 import hvplot.xarray  # noqa
+
+import requests
+from time import sleep
+
+
+
 def is_mam(month):
     return (month >= 3) & (month <= 5)
 def is_jja(month):
@@ -2113,3 +2119,72 @@ def read_and_plot_sst_labrador(path_data,now):
                size=ftz,
                weight='bold')
     
+    
+    
+    
+### install stuff to get the position of meteor ### 
+
+
+KNOWN_PLATFORMS=["AL", "M", "MSM", "SO"]
+
+
+def get_platform_info(platform: str = "M"):
+    """Get current status for platform.
+    
+    Parameters
+    ----------
+    platform : str
+        Platform ID. Possible values are "SO", "M", "MSM" und AL".
+        Defaults to "M".
+        
+    Returns
+    -------
+    dict
+        "platform": Platform id.
+        "leg": Leg info.
+        "lon": Longitude.
+        "lat": Latitude.
+        "time": Time stamp of position.
+
+    """
+    try:
+        platform_info = requests.get(
+            f"https://maps.geomar.de/mapgen_ds/platforms/currentloc?id={platform}",
+            timeout=2.0
+        ).json()
+    except requests.exceptions.Timeout:
+        # retry once
+        try:
+            sleep(3.0)
+            platform_info = requests.get(
+                f"https://maps.geomar.de/mapgen_ds/platforms/currentloc?id={platform}",
+                timeout=4.0
+            ).json()
+        except requests.exceptions.Timeout:
+            return {}
+    
+    longitude, latitude = platform_info["geometry"]["coordinates"]
+    time = datetime.datetime.strptime(
+        platform_info["properties"]["data_origin"].split("_")[-1],
+        "%Y-%m-%d %H:%M:%S"
+    )
+    
+    return {
+        "platform": platform_info["properties"]["platform"],
+        "leg": platform_info["properties"]["leg_label"],
+        "time": time,
+        "latitude": latitude,
+        "longitude": longitude,
+    }
+
+
+def get_all_platforms(platforms: list = None):
+    if platforms is None:
+        platforms = KNOWN_PLATFORMS
+    return {
+        pfname: get_platform_info(pfname) for pfname in platforms
+    }
+
+
+def get_all_platforms_df(platforms: list = None):
+    return pd.DataFrame(get_all_platforms(platforms)).T
