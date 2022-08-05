@@ -47,6 +47,7 @@ jobs:
           python3 -m ipykernel install --user --name python3
           python3 -m pip install -I jinja2==3.0.3
           python3 -m pip install https://github.com/pydap/pydap/archive/refs/tags/3.3.0.tar.gz
+          python3 -m pip install git+https://github.com/SciTools/cartopy.git
           sudo chmod -R 777 .
       - name: Complete listing of data dirs
         if: ${{ always() }}
