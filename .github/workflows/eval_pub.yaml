@@ -35,9 +35,8 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt update
-          sudo apt install   \
-
-            libgeos-dev \
+          sudo apt install \
+            libgeos-dev   \
             libproj-dev   \ 
             poppler-utils
 
