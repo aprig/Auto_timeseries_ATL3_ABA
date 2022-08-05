@@ -36,6 +36,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install proj-bin
+          sudo apt-get install python-software-properties
+          sudo add-apt-repository ppa:ubuntugis/ppa
           sudo apt-get install geos
 
           python3 -m pip install --upgrade pip
