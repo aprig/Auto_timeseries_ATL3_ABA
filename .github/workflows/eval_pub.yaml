@@ -35,9 +35,6 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt update
-          sudo apt install \
-            libproj-dev   \ 
-            poppler-utils
 
           python3 -m pip install --upgrade pip
           pip3 install -r ./requirements.txt
