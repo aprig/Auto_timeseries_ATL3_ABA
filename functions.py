@@ -2056,7 +2056,7 @@ def plot_pirata_temp(temp_35w,temp_23w,temp_10w,temp_0w):
     
 def read_and_plot_sla(path_data):
     ds = xr.open_dataset(path_data+'rads_global_nrt_sla_latest.nc',engine='pydap')
-    ds_sub = ds.where((ds.latitude>50)&(ds.latitude<65)&(ds.longitude>-65)&(ds.longitude<-35),drop=True)
+    ds_sub = ds.where((ds.latitude>46)&(ds.latitude<62)&(ds.longitude>-65)&(ds.longitude<-35),drop=True)
     f,ax = plt.subplots(1,1,figsize=[15,15])
     ftz=15
     cmap = plt.cm.bwr
@@ -2070,13 +2070,46 @@ def read_and_plot_sla(path_data):
     cbar.ax.tick_params(labelsize=ftz)
     ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
     ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
-    ax.set_yticks(np.arange(50,66,2))
+    ax.set_yticks(np.arange(48,64,2))
     ax.set_xticks(np.arange(-65,-35,2))
     ax.tick_params(labelsize=ftz)
     ax.clabel(cs1, inline=1, fontsize=ftz-5)
 
     cbar.set_label(r' SLA (m)', size=ftz)
-    ax.text(0.45,0.95,'Updated '+date_time,transform=ax.transAxes,
+    ax.text(0.01,0.4,'Updated '+date_time,transform=ax.transAxes,
+               size=ftz,
+               weight='bold')
+    
+    
+    
+
+def read_and_plot_sst_labrador(path_data,now):
+    ds_tmp = xr.open_dataset(path_data+'sst.day.mean.'+str(now.year)+'.v2.nc',engine='pydap')
+    ds = ds_tmp.sst[-4:]
+    del ds_tmp
+    ds = xr.concat([ds[:, :, 180:], ds[:, :, :180]], dim='lon')
+    ds.coords['lon'] = (ds.coords['lon'] + 180) % 360 - 180
+    
+    ds_sub = ds.where((ds.lat>48)&(ds.lat<62)&(ds.lon>-65)&(ds.lon<-35),drop=True)
+    f,ax = plt.subplots(1,1,figsize=[15,15])
+    ftz=15
+    cmap = plt.cm.RdYlBu_r
+    bounds= np.arange(0,20,0.5)
+    ax.set_title(str(ds_sub.time.values[-1])[:10],fontsize=ftz)
+    cs1 = ax.contour(ds_sub.lon,ds_sub.lat,ds_sub[-1,:,:],colors='black',levels=[4,6,8,10])
+    p1 = ax.contourf(ds_sub.lon,ds_sub.lat,ds_sub[-1,:,:],cmap=cmap,levels=bounds,extend='both')
+
+    cbar = plt.colorbar(p1)
+    cbar.ax.tick_params(labelsize=ftz)
+    ax.set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax.set_ylabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax.set_yticks(np.arange(48,64,2))
+    ax.set_xticks(np.arange(-65,-35,2))
+    ax.tick_params(labelsize=ftz)
+    ax.clabel(cs1, inline=1, fontsize=ftz-5)
+
+    cbar.set_label(r' SST ($^{\circ}$C)', size=ftz)
+    ax.text(0.01,0.4,'Updated '+date_time,transform=ax.transAxes,
                size=ftz,
                weight='bold')
     
