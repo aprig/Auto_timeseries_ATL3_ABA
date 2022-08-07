@@ -16,13 +16,13 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 #import cartopy
 import matplotlib.patches as mpatches
 now = datetime.now()
+print(now)
 date_time = now.strftime("%d/%m/%Y")
 import matplotlib
 import hvplot.pandas  # noqa
 import hvplot.xarray  # noqa
-
 import requests
-from time import sleep
+
 
 
 
@@ -185,7 +185,7 @@ def read_data_compute_anomalies_week(path_data):
     ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1990, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
@@ -231,7 +231,7 @@ def read_data_compute_anomalies_oi(path_data):
     ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
@@ -286,7 +286,8 @@ def read_data_compute_anomalies_oi(path_data):
 def read_data_compute_anomalies(path_data):
     
     ds = xr.open_dataset(path_data,engine='pydap')
-    sst= ds.sst.sel(time=slice(datetime(1982, 1, 1), now))
+    print(ds)
+    sst= ds.sst.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
@@ -334,7 +335,7 @@ def read_data_compute_anomalies(path_data):
 def read_data_compute_anomalies_ersstv5(path_data):
     
     ds = xr.open_dataset(path_data,engine='pydap')
-    sst= ds.sst.sel(time=slice(datetime(1982, 1, 1), now))
+    sst= ds.sst.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 90:], sst[:, :, :90]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
@@ -611,8 +612,8 @@ def plot_anomalies_wk_aba(ssta_aba):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_aba_1 = ssta_aba.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_aba_2 = ssta_aba.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_aba_1 = ssta_aba.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_aba_2 = ssta_aba.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### ABA ###
     ax[0].set_title(
         'Normalized SST anomalies ABA [8$^{\circ}$E-16$^{\circ}$E; 20$^{\circ}$S-10$^{\circ}$S] | Baseline '+
@@ -671,8 +672,8 @@ def plot_anomalies_wk_atl3(ssta_atl3):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_atl3_1 = ssta_atl3.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_atl3_2 = ssta_atl3.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_atl3_1 = ssta_atl3.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_atl3_2 = ssta_atl3.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### ABA ###
     ax[0].set_title('Normalized SST anomalies ATL3 [20$^{\circ}$W-0; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
                     str(ssta_atl3.time.values[0])[:7] +' --> '+
@@ -726,8 +727,8 @@ def plot_anomalies_wk_nino34(ssta_nino34):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_nino34_1 = ssta_nino34.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_nino34_2 = ssta_nino34.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_nino34_1 = ssta_nino34.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_nino34_2 = ssta_nino34.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### NINO3.4 ###
     ax[0].set_title('Normalized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
                     str(ssta_nino34.time.values[0])[:7] +' --> '+
@@ -780,8 +781,8 @@ def plot_anomalies_wk_dni(ssta_dni):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_dni_1 = ssta_dni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_dni_2 = ssta_dni.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_dni_1 = ssta_dni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_dni_2 = ssta_dni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### NINO3.4 ###
     ax[0].set_title('Normalized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
                     str(ssta_dni.time.values[0])[:7] +' --> '+
@@ -835,8 +836,8 @@ def plot_anomalies_wk_nni(ssta_nni):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_nni_1 = ssta_nni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_nni_2 = ssta_nni.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_nni_1 = ssta_nni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_nni_2 = ssta_nni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### NINO3.4 ###
     ax[0].set_title('Normalized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
                     str(ssta_nni.time.values[0])[:7] +' --> '+
@@ -889,8 +890,8 @@ def plot_anomalies_wk_cni(ssta_cni):
     color_lines='grey'
     ftz=15
     ax=ax.ravel()
-    ssta_cni_1 = ssta_cni.sel(time=slice(datetime(1990, 1, 1), datetime(2004, 12, 1)))
-    ssta_cni_2 = ssta_cni.sel(time=slice(datetime(2005, 1, 1), now))
+    ssta_cni_1 = ssta_cni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
+    ssta_cni_2 = ssta_cni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
     ### NINO3.4 ###
     ax[0].set_title('Normalized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
                     str(ssta_cni.time.values[0])[:7] +' --> '+
@@ -947,7 +948,7 @@ def read_data_compute_anomalies_map_atl(path_data):
     ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180   
     
@@ -1043,7 +1044,7 @@ def read_data_compute_anomalies_map_pac(path_data):
     ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180   
     
@@ -1150,7 +1151,7 @@ def read_data_compute_anomalies_map_ind(path_data):
     ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180   
       
@@ -1242,7 +1243,7 @@ def plot_wamoi(cmap_data):
 
     ds = xr.open_dataset(cmap_data,engine='pydap')
     
-    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    ds= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     precip = xr.concat([ds.precip[:, :, 72:], ds.precip[:, :, :72]], dim='lon')
     precip.coords['lon'] = (precip.coords['lon'] + 180) % 360 - 180
     
@@ -1267,8 +1268,8 @@ def plot_wamoi(cmap_data):
     for i in range(2000,now.year+1,1):
         try:
             
-            wamoi_clim[k,:] = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
-            tmp = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            wamoi_clim[k,:] = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            tmp = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
             index_WAM = xr.full_like(tmp,0)
             index_WAM[tmp >= 0] = 1
             index_tmp = []
@@ -1282,7 +1283,7 @@ def plot_wamoi(cmap_data):
 
             k+=1
         except ValueError:
-            test = wamoi.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            test = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
             new = np.ones((73))*np.nan
             new[:test.shape[0]] = test
             wamoi_clim[k,:]=new
@@ -1291,7 +1292,7 @@ def plot_wamoi(cmap_data):
             
             
             
-    time = wamoi.sel(time=slice(datetime(2020, 1, 1),datetime(2020, 12, 31) ))   
+    time = wamoi.sel(time=slice(datetime.datetime(2020, 1, 1),datetime.datetime(2020, 12, 31) ))   
     
     
     f,ax = plt.subplots(2,1,figsize=[15,10])
@@ -1359,7 +1360,7 @@ def read_data_ACT_week_plot(path_data):
     ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
     mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
     ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime(1990, 1, 1), now))
+    sst= ds.sel(time=slice(datetime.datetime(1990, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
@@ -1413,7 +1414,7 @@ def read_data_ACT_week_plot(path_data):
         index_tmp = []
         try:
 
-            sact_clim = Sact_dataset.sact.sel(time=slice(datetime(i, 1, 1),datetime(i, 12, 31) ))
+            sact_clim = Sact_dataset.sact.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
 
 
             for j in range(sact_clim.shape[0]):
@@ -1518,7 +1519,7 @@ def plot_amo(data_amo):
 def read_compute_anomalies_uwind_plot(data):
 
     ds = xr.open_dataset(data,engine='pydap')
-    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    ds= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     uwnd = xr.concat([ds.uwnd[:, :, 72:], ds.uwnd[:, :, :72]], dim='lon')
     uwnd.coords['lon'] = (uwnd.coords['lon'] + 180) % 360 - 180
 
@@ -1570,7 +1571,7 @@ def read_compute_anomalies_uwind_plot(data):
     
 def plot_slp(ncep_data_slp):
     ds = xr.open_dataset(ncep_data_slp,engine='pydap')
-    ds= ds.sel(time=slice(datetime(1982, 1, 1), now))
+    ds= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     slp = xr.concat([ds.slp[:, :, 72:], ds.slp[:, :, :72]], dim='lon')
     slp.coords['lon'] = (slp.coords['lon'] + 180) % 360 - 180
     slp_atl = slp.where((  slp.lon>=-30) & (slp.lon<=-10) &
@@ -1608,8 +1609,8 @@ def plot_slp(ncep_data_slp):
     myFmt = mdates.DateFormatter('%Y')
     ax.xaxis.set_major_formatter(myFmt)
 def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
-    uwnda_atl4= uwnda_atl4.sel(time=slice(datetime(1982, 1, 1), datetime(now.year-1, 12, 1)))
-    ssta_atl3= ssta_atl3.sel(time=slice(datetime(1982, 1, 1), datetime(now.year-1, 12, 1)))
+    uwnda_atl4= uwnda_atl4.sel(time=slice(datetime.datetime(1982, 1, 1), datetime.datetime(now.year-1, 12, 1)))
+    ssta_atl3= ssta_atl3.sel(time=slice(datetime.datetime(1982, 1, 1), datetime.datetime(now.year-1, 12, 1)))
     
         
     uwnda_atl4_mam = uwnda_atl4.sel(time=is_mam(
@@ -1935,20 +1936,20 @@ def plot_daily_trop_map_anom(sst_trop_atlantic,sst_eq_atlantic,sst_af_atlantic):
 def read_pirata_temp(path_data):
 
     ds_35w = xr.open_dataset(path_data+'OS_0n35w_199801_M_TVSM_dy.nc',engine='pydap')
-    temp_35w= ds_35w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
+    temp_35w= ds_35w.TEMP[:,0,0,0].sel(TIME=slice(datetime.datetime(2000, 1, 1), now))
 
     ds_23w = xr.open_dataset(path_data+'OS_0n23w_199903_M_TVSM_dy.nc',
                          engine='pydap')
-    temp_23w= ds_23w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
+    temp_23w= ds_23w.TEMP[:,0,0,0].sel(TIME=slice(datetime.datetime(2000, 1, 1), now))
 
 
     ds_10w = xr.open_dataset(path_data+'OS_0n10w_199709_M_TVSM_dy.nc',
                          engine='pydap')
-    temp_10w= ds_10w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
+    temp_10w= ds_10w.TEMP[:,0,0,0].sel(TIME=slice(datetime.datetime(2000, 1, 1), now))
 
     ds_0w = xr.open_dataset(path_data+'OS_0n0e_199802_M_TSM_dy.nc',
                          engine='pydap')
-    temp_0w= ds_0w.TEMP[:,0,0,0].sel(TIME=slice(datetime(2000, 1, 1), now))
+    temp_0w= ds_0w.TEMP[:,0,0,0].sel(TIME=slice(datetime.datetime(2000, 1, 1), now))
     
     return temp_35w,temp_23w,temp_10w,temp_0w
 
@@ -2071,7 +2072,7 @@ def plot_pirata_temp(temp_35w,temp_23w,temp_10w,temp_0w):
 
 
 KNOWN_PLATFORMS=["AL", "M", "MSM", "SO"]
-
+from time import sleep
 import datetime
 def get_platform_info(platform: str = "M"):
     """Get current status for platform.
