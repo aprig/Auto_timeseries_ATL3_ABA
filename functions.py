@@ -2283,12 +2283,18 @@ def plot_hovmoller_eq_aba(sst_eq,sst_aba):
 
     ax[0].set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
     ax[0].tick_params(labelsize=ftz)
+    #ax[0].set_title(sst_eq.time[-1],fontsize=ftz)
+    ax[0].set_title(str(sst_eq.time.values[-1])[:10],fontsize=ftz)
+    ax[0].text(0.01,0.05,'Updated '+date_time,transform=ax[0].transAxes,
+               size=ftz,
+               weight='bold')
 
     cs0 = ax[1].contourf(sst_aba.lat,sst_aba.time,sst_aba,cmap=cmap,
                       levels=bounds,extend='both')
     ax[1].invert_xaxis()
     ax[1].set_xlabel('Latitude ($^{\circ}$)',fontsize=ftz)
     ax[1].tick_params(labelsize=ftz)
+    ax[1].set_title(str(sst_eq.time.values[-1])[:10],fontsize=ftz)
 
     cbar = plt.colorbar(cs0)
     cbar.ax.tick_params(labelsize=ftz)
