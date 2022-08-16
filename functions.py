@@ -2217,3 +2217,79 @@ def read_and_plot_sst_labrador(path_data,now):
     ax.text(0.01,0.4,'Updated '+date_time,transform=ax.transAxes,
                size=ftz,
                weight='bold')
+    
+    
+    
+def data_howmoller(path_data,now):
+    
+    sst_tmp = xr.open_dataset(path_data+'sst.day.anom.'+str(now.year)+'.v2.nc',engine='pydap')
+    sst_oi_2_eq = sst_tmp.anom[:,300:400,:]
+    del sst_tmp
+    sst_oi_2_eq = xr.concat([sst_oi_2_eq[:, :, 720:], sst_oi_2_eq[:, :, :720]], dim='lon')
+    sst_oi_2_eq.coords['lon'] = (sst_oi_2_eq.coords['lon'] + 180) % 360 - 180
+    print('done')    
+    sst_oi_all = sst_oi_2_eq
+    del sst_oi_2_eq
+
+
+    sst_eq_hov = sst_oi_all.where((  sst_oi_all.lon>=-45) & (sst_oi_all.lon<=10) &
+                               (sst_oi_all.lat<=3) & (sst_oi_all.lat>=-3),drop=True)
+    sst_tmp = xr.open_dataset(path_data+'sst.day.anom.'+str(now.year)+'.v2.nc',engine='pydap')
+    sst_oi_2_ab = sst_tmp.anom[:,238:365,:]
+    del sst_tmp
+    sst_oi_2_ab = xr.concat([sst_oi_2_ab[:, :, 720:], sst_oi_2_ab[:, :, :720]], dim='lon')
+    sst_oi_2_ab.coords['lon'] = (sst_oi_2_ab.coords['lon'] + 180) % 360 - 180
+    print('done')
+
+    sst_oi_all_ab_tmp = sst_oi_2_ab
+    del sst_oi_2_ab
+    sst_ab_hov = sst_oi_all_ab_tmp.where((  sst_oi_all_ab_tmp.lon>=0) & (sst_oi_all_ab_tmp.lon<=20) &
+                               (sst_oi_all_ab_tmp.lat<=0) & (sst_oi_all_ab_tmp.lat>=-30),drop=True)
+
+    print('done')
+    mask_1deg_tmp = np.zeros((sst_ab_hov[0,:,:].shape))
+    width = 8 # 4 for 1/2 degree resolution 
+
+    lon_test_2 = []
+    lon_test_1 = []
+
+    for i in range(mask_1deg_tmp.shape[0]):
+        lon_nan = np.where(np.isnan(sst_ab_hov[0,i,:])==True)
+
+        mask_1deg_tmp[i,lon_nan[0][0]-1-width:lon_nan[0][0]-1] = 1
+
+    mask_1_deg  = xr.Dataset({'mask': (['lat','lon'],mask_1deg_tmp)}
+                       ,coords={'lat':(np.array(sst_ab_hov.lat)),
+                                 'lon':(np.array(sst_ab_hov.lon))})
+
+    sst_ab_hov_masked = sst_ab_hov.where(mask_1_deg.mask==1)
+
+    sst_eq_hov_mean = sst_eq_hov.mean(dim='lat')
+    sst_ab_hov_masked_mean = sst_ab_hov_masked.mean(dim='lon')
+    
+    
+    
+    return sst_eq_hov_mean,sst_ab_hov_masked_mean
+
+def plot_hovmoller_eq_aba(sst_eq,sst_aba):
+    f,ax = plt.subplots(1,2,figsize=[10,10],sharey=True)
+
+    ax=ax.ravel()
+    ftz=15
+    cmap = plt.cm.RdYlBu_r
+    bounds = np.arange(-2,2.2,0.2)
+    cs0 = ax[0].contourf(sst_eq.lon,sst_eq.time,sst_eq,cmap=cmap,
+                      levels=bounds,extend='both')
+
+    ax[0].set_xlabel('Longitude ($^{\circ}$)',fontsize=ftz)
+    ax[0].tick_params(labelsize=ftz)
+
+    cs0 = ax[1].contourf(sst_aba.lat,sst_aba.time,sst_aba,cmap=cmap,
+                      levels=bounds,extend='both')
+    ax[1].invert_xaxis()
+    ax[1].set_xlabel('Latitude ($^{\circ}$)',fontsize=ftz)
+    ax[1].tick_params(labelsize=ftz)
+
+    cbar = plt.colorbar(cs0)
+    cbar.ax.tick_params(labelsize=ftz)
+    cbar.set_label('($^{\circ}$C)',fontsize=ftz)
