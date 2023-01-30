@@ -434,7 +434,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
            size=ftz,
            weight='bold')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
     ### ABA ###
@@ -471,7 +471,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
                                ssta_aba[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
 
 
-    ax[1].set_ylim([-3,3])
+    ax[1].set_ylim([-4,4])
     
     ### NINO 3.4 ###
     index_warm,index_cold,_,_ = create_table_event(ssta_nino34)
@@ -505,7 +505,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
             ax[3].fill_between(ssta_nino34.time.values[index_cold[0,i]:index_cold[1,i]],
                      ssta_nino34[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_nino34[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
-    ax[3].set_ylim([-3,3])
+    ax[3].set_ylim([-4,4])
     
     ### DNI ###
     index_warm,index_cold,_,_ = create_table_event(ssta_dni)
@@ -539,7 +539,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
             ax[2].fill_between(ssta_dni.time.values[index_cold[0,i]:index_cold[1,i]],
                      ssta_dni[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_dni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
-    ax[2].set_ylim([-3,3])
+    ax[2].set_ylim([-4,4])
     
     ### CNI ###
     index_warm,index_cold,_,_ = create_table_event(ssta_cni)
@@ -573,7 +573,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
             ax[4].fill_between(ssta_cni.time.values[index_cold[0,i]:index_cold[1,i]],
                      ssta_cni[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_cni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
-    ax[4].set_ylim([-3,3])
+    ax[4].set_ylim([-4,4])
     
     ### NNI ###
     index_warm,index_cold,_,_ = create_table_event(ssta_nni)
@@ -607,7 +607,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
             ax[5].fill_between(ssta_nni.time.values[index_cold[0,i]:index_cold[1,i]],
                      ssta_nni[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_nni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
-    ax[5].set_ylim([-3,3])
+    ax[5].set_ylim([-4,4])
     
     
 def plot_anomalies_wk_aba(ssta_aba):
@@ -639,7 +639,7 @@ def plot_anomalies_wk_aba(ssta_aba):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_aba_1.time.values,ssta_aba_1,1,ssta_aba_1>1,color='red')
     ax[0].fill_between(ssta_aba_1.time.values,ssta_aba_1,-1,ssta_aba_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -664,7 +664,7 @@ def plot_anomalies_wk_aba(ssta_aba):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_aba_2.time.values,ssta_aba_2,1,ssta_aba_2>1,color='red')
     ax[1].fill_between(ssta_aba_2.time.values,ssta_aba_2,-1,ssta_aba_2<-1,color='blue')
-    ax[1].set_ylim([-3,3])
+    ax[1].set_ylim([-4,4])
     
     
     
@@ -698,7 +698,7 @@ def plot_anomalies_wk_atl3(ssta_atl3):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_atl3_1.time.values,ssta_atl3_1,1,ssta_atl3_1>1,color='red')
     ax[0].fill_between(ssta_atl3_1.time.values,ssta_atl3_1,-1,ssta_atl3_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -722,7 +722,7 @@ def plot_anomalies_wk_atl3(ssta_atl3):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_atl3_2.time.values,ssta_atl3_2,1,ssta_atl3_2>1,color='red')
     ax[1].fill_between(ssta_atl3_2.time.values,ssta_atl3_2,-1,ssta_atl3_2<-1,color='blue')
-    ax[1].set_ylim([-3,3])
+    ax[1].set_ylim([-4,4])
     
     
 def plot_anomalies_wk_nino34(ssta_nino34):
@@ -753,7 +753,7 @@ def plot_anomalies_wk_nino34(ssta_nino34):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,1,ssta_nino34_1>1,color='red')
     ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,-1,ssta_nino34_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -777,7 +777,7 @@ def plot_anomalies_wk_nino34(ssta_nino34):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,1,ssta_nino34_2>1,color='red')
     ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,-1,ssta_nino34_2<-1,color='blue')
-    ax[1].set_ylim([-3,3])
+    ax[1].set_ylim([-4,4])
     
 def plot_anomalies_wk_dni(ssta_dni):
     
@@ -807,7 +807,7 @@ def plot_anomalies_wk_dni(ssta_dni):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,1,ssta_dni_1>1,color='red')
     ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,-1,ssta_dni_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -831,7 +831,7 @@ def plot_anomalies_wk_dni(ssta_dni):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,1,ssta_dni_2>1,color='red')
     ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,-1,ssta_dni_2<-1,color='blue')
-    ax[1].set_ylim([-3,3]) 
+    ax[1].set_ylim([-4,4]) 
     
     
 def plot_anomalies_wk_nni(ssta_nni):
@@ -862,7 +862,7 @@ def plot_anomalies_wk_nni(ssta_nni):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,1,ssta_nni_1>1,color='red')
     ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,-1,ssta_nni_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -886,7 +886,7 @@ def plot_anomalies_wk_nni(ssta_nni):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,1,ssta_nni_2>1,color='red')
     ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,-1,ssta_nni_2<-1,color='blue')
-    ax[1].set_ylim([-3,3]) 
+    ax[1].set_ylim([-4,4]) 
     
 def plot_anomalies_wk_cni(ssta_cni):
     
@@ -916,7 +916,7 @@ def plot_anomalies_wk_cni(ssta_cni):
     ax[0].tick_params(labelsize=ftz)
     ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,1,ssta_cni_1>1,color='red')
     ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,-1,ssta_cni_1<-1,color='blue')
-    ax[0].set_ylim([-3,3])
+    ax[0].set_ylim([-4,4])
     
     
 
@@ -940,7 +940,7 @@ def plot_anomalies_wk_cni(ssta_cni):
     ax[1].tick_params(labelsize=ftz)
     ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,1,ssta_cni_2>1,color='red')
     ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,-1,ssta_cni_2<-1,color='blue')
-    ax[1].set_ylim([-3,3]) 
+    ax[1].set_ylim([-4,4]) 
     
 #import cartopy.crs as ccrs
 #import cartopy    
