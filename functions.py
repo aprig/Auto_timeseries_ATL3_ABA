@@ -136,18 +136,16 @@ def ano_norm_t(ds):
     Returns the anomalies of var relative the climatology normalized by the standard deviation.
     
     '''    
-
-    clim     = ds.groupby('time.month').mean('time')
-    clim_std = ds.groupby('time.month').std('time')
+    idx_complete_years = ds.time.shape[0]//12
+    
+    clim     = ds[:idx_complete_years*12].groupby('time.month').mean('time')
+    
     ano      = ds.groupby('time.month') - clim
-    #ano_norm = xr.apply_ufunc(lambda x, m, s: (x - m) / s,
-    #                                ds.groupby('time.month'),
-    #                                clim, clim_std)
-    
-    
+
     ano_std = ano/ano.std()
-    
-    return ano, ano_std 
+    ano_std.attrs['clim_str'] = ds.time[0].values
+    ano_std.attrs['clim_end'] = ds.time[:idx_complete_years*12][-1].values
+    return ano, ano_std
 
 
 
@@ -290,7 +288,6 @@ def read_data_compute_anomalies_oi(path_data):
 def read_data_compute_anomalies(path_data):
     
     ds = xr.open_dataset(path_data,engine='pydap')
-    print(ds)
     sst= ds.sst.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
@@ -333,7 +330,6 @@ def read_data_compute_anomalies(path_data):
     
     
     return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
-
 
 
 def read_data_compute_anomalies_ersstv5(path_data):
@@ -392,6 +388,8 @@ def create_table_event(ssta):
     
     return warm,cold,df_warm,df_cold
 
+
+
 def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     
     f,ax = plt.subplots(6,1,figsize=[15,30])
@@ -429,8 +427,9 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
 
     
     ax[0].set_title('Standardized SST anomalies ATL3 [20$^{\circ}$W-0; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
-                    str(ssta_atl3.time.values[0])[:7] +' --> '+
-                    str(ssta_atl3.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_atl3.clim_str)[:7] +' --> '+
+                    str(ssta_atl3.clim_end)[:7],fontsize=ftz,fontweight='bold')
+    
     ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
            size=ftz,
            weight='bold')
@@ -441,8 +440,8 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     index_warm,index_cold,_,_ = create_table_event(ssta_aba)
     ax[1].set_title(
         'Standardized SST anomalies ABA [8$^{\circ}$E-16$^{\circ}$E; 20$^{\circ}$S-10$^{\circ}$S] | Baseline '+
-                    str(ssta_aba.time.values[0])[:7] +' --> '+
-                    str(ssta_aba.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_aba.clim_str)[:7] +' --> '+
+                    str(ssta_aba.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax[1].plot(ssta_aba.time,ssta_aba,color='black')
     ax[1].axhline(0,color=color_lines)
     ax[1].axhline(1,color=color_lines,linestyle='--')
@@ -477,8 +476,8 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     index_warm,index_cold,_,_ = create_table_event(ssta_nino34)
     ax[3].set_title(
         'Standardized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
-                    str(ssta_nino34.time.values[0])[:7] +' --> '+
-                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_nino34.clim_str)[:7] +' --> '+
+                    str(ssta_nino34.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax[3].plot(ssta_nino34.time,ssta_nino34,color='black')
     ax[3].axhline(0,color=color_lines)
     ax[3].axhline(1,color=color_lines,linestyle='--')
@@ -511,8 +510,8 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     index_warm,index_cold,_,_ = create_table_event(ssta_dni)
     ax[2].set_title(
         'Standardized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
-                    str(ssta_dni.time.values[0])[:7] +' --> '+
-                    str(ssta_dni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_dni.clim_str)[:7] +' --> '+
+                    str(ssta_dni.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax[2].plot(ssta_dni.time,ssta_dni,color='black')
     ax[2].axhline(0,color=color_lines)
     ax[2].axhline(1,color=color_lines,linestyle='--')
@@ -545,8 +544,8 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     index_warm,index_cold,_,_ = create_table_event(ssta_cni)
     ax[4].set_title(
         'Standardized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
-                    str(ssta_cni.time.values[0])[:7] +' --> '+
-                    str(ssta_cni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_cni.clim_str)[:7] +' --> '+
+                    str(ssta_cni.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax[4].plot(ssta_cni.time,ssta_cni,color='black')
     ax[4].axhline(0,color=color_lines)
     ax[4].axhline(1,color=color_lines,linestyle='--')
@@ -579,8 +578,8 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     index_warm,index_cold,_,_ = create_table_event(ssta_nni)
     ax[5].set_title(
         'Standardized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
-                    str(ssta_nni.time.values[0])[:7] +' --> '+
-                    str(ssta_nni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_nni.clim_str)[:7] +' --> '+
+                    str(ssta_nni.clim_str)[:7],fontsize=ftz,fontweight='bold')
     ax[5].plot(ssta_nni.time,ssta_nni,color='black')
     ax[5].axhline(0,color=color_lines)
     ax[5].axhline(1,color=color_lines,linestyle='--')
@@ -608,7 +607,6 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
                      ssta_nni[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_nni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[5].set_ylim([-4,4])
-    
     
 def plot_anomalies_wk_aba(ssta_aba):
     
