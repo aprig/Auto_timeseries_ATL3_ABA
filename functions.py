@@ -376,15 +376,28 @@ def read_data_compute_anomalies_ersstv5(path_data):
     return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
 
 def create_table_event(ssta):
-    warm,cold=find_event(ssta,1)
-    data_table_warm = np.vstack((ssta[warm[0,warm[2,:]>3]].time,
-                           ssta[warm[1,warm[2,:]>3]].time))
-    df_warm = pd.DataFrame(data_table_warm.T, columns = ['Start date','End date'], 
-                      )
-    data_table_cold = np.vstack((ssta[cold[0,cold[2,:]>3]].time,
-                           ssta[cold[1,cold[2,:]>3]].time))
+    warm,cold=find_event(ssta,1)    
+    data_table_warm = np.vstack((ssta[warm[0,warm[2,:]>=3]].time,
+                           ssta[warm[1,warm[2,:]>=3]].time))
+    df_warm = pd.DataFrame(data_table_warm.T, columns = ['Start date','End date'])
+    df_warm['Duration']  = (list(warm[2,warm[2,:]>=3])  ) 
+    ssta_cumul_w = [] 
+    ssta_cumul_c = [] 
+    for i in range(len(list(warm[0,warm[2,:]>=3]))):
+        ssta_cumul_w.append(np.sum(ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]])/list(warm[2,warm[2,:]>=3])[i]) 
+    df_warm['Mean SSTa']  = (np.round(np.array(ssta_cumul_w),3) ) 
+    
+    
+    data_table_cold = np.vstack((ssta[cold[0,cold[2,:]>=3]].time,
+                           ssta[cold[1,cold[2,:]>=3]].time))
+    
+    for i in range(len(list(cold[0,cold[2,:]>=3]))):
+        ssta_cumul_c.append(np.sum(ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]])/list(cold[2,cold[2,:]>=3])[i]) 
+    
     
     df_cold = pd.DataFrame(data_table_cold.T, columns = ['Start date','End date'])
+    df_cold['Duration']  = (list(cold[2,cold[2,:]>=3])  )   
+    df_cold['Mean SSTa']  = (np.round(np.array(ssta_cumul_c),3) ) 
     df_cold["Start date"] = df_cold["Start date"].dt.strftime('%Y-%m')
     df_cold["End date"] = df_cold["End date"].dt.strftime('%Y-%m')
     
@@ -1798,7 +1811,7 @@ def plot_IOD(iod_index):
     ax.xaxis.set_minor_locator(years_minor)
     myFmt = mdates.DateFormatter('%Y')
     ax.xaxis.set_major_formatter(myFmt)
-    ax.set_ylim([-1.5,1.5])
+    ax.set_ylim([-2,2])
     ax.set_ylabel('[$^{\circ}$C]',fontsize=ftz)
     
     
