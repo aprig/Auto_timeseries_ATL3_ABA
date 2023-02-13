@@ -385,6 +385,11 @@ def create_table_event(ssta):
                            ssta[cold[1,cold[2,:]>3]].time))
     
     df_cold = pd.DataFrame(data_table_cold.T, columns = ['Start date','End date'])
+    df_cold["Start date"] = df_cold["Start date"].dt.strftime('%Y-%m')
+    df_cold["End date"] = df_cold["End date"].dt.strftime('%Y-%m')
+    
+    df_warm["Start date"] = df_warm["Start date"].dt.strftime('%Y-%m')
+    df_warm["End date"] = df_warm["End date"].dt.strftime('%Y-%m')
     
     return warm,cold,df_warm,df_cold
 
