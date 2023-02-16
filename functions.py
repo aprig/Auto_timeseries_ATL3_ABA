@@ -381,25 +381,44 @@ def create_table_event(ssta):
                            ssta[warm[1,warm[2,:]>=3]].time))
     df_warm = pd.DataFrame(data_table_warm.T, columns = ['Start date','End date'])
     df_warm['Duration']  = (list(warm[2,warm[2,:]>=3])  ) 
-    ssta_cumul_w = [] 
-    ssta_cumul_c = [] 
+    ssta_cumul_w1 = []
+    ssta_cumul_w2 = []
+    ssta_max_w = []
+    date_max_w = []
+    ssta_cumul_c1 = []
+    ssta_cumul_c2 = [] 
+    ssta_min_c = []
+    date_min_c = []
     for i in range(len(list(warm[0,warm[2,:]>=3]))):
-        ssta_cumul_w.append(np.sum(ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]])/list(warm[2,warm[2,:]>=3])[i]) 
-    df_warm['Mean SSTa']  = (np.round(np.array(ssta_cumul_w),3) ) 
+        ssta_cumul_w1.append(np.sum(ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]])/list(warm[2,warm[2,:]>=3])[i])
+        ssta_cumul_w2.append(np.sum(ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]]))
+        ssta_max_w.append(ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]].max())
+        date_max_w.append(ssta.time[ssta==ssta[list(warm[0,warm[2,:]>=3])[i]:list(warm[1,warm[2,:]>=3])[i]].max()].values[0])
+
+    df_warm['Mean SSTa']  = (np.round(np.array(ssta_cumul_w1),2) ) 
+    df_warm['Cumul SSTa']  = (np.round(np.array(ssta_cumul_w2),2) ) 
+    df_warm['Max SSTa']  = (np.round(np.array(ssta_max_w),2) ) 
+    df_warm['Date max SSTa']  = list(np.array(date_max_w))
     
     
     data_table_cold = np.vstack((ssta[cold[0,cold[2,:]>=3]].time,
                            ssta[cold[1,cold[2,:]>=3]].time))
     
     for i in range(len(list(cold[0,cold[2,:]>=3]))):
-        ssta_cumul_c.append(np.sum(ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]])/list(cold[2,cold[2,:]>=3])[i]) 
-    
+        ssta_cumul_c1.append(np.sum(ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]])/list(cold[2,cold[2,:]>=3])[i]) 
+        ssta_cumul_c2.append(np.sum(ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]])) 
+        ssta_min_c.append(ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]].min())
+        date_min_c.append(ssta.time[ssta==ssta[list(cold[0,cold[2,:]>=3])[i]:list(cold[1,cold[2,:]>=3])[i]].min()].values[0])
+
     
     df_cold = pd.DataFrame(data_table_cold.T, columns = ['Start date','End date'])
     df_cold['Duration']  = (list(cold[2,cold[2,:]>=3])  )   
-    df_cold['Mean SSTa']  = (np.round(np.array(ssta_cumul_c),3) ) 
+    df_cold['Mean SSTa']  = (np.round(np.array(ssta_cumul_c1),2) )
+    df_cold['Cumul SSTa']  = (np.round(np.array(ssta_cumul_c2),2) )
     df_cold["Start date"] = df_cold["Start date"].dt.strftime('%Y-%m')
     df_cold["End date"] = df_cold["End date"].dt.strftime('%Y-%m')
+    df_cold['Max SSTa']  = (np.round(np.array(ssta_min_c),2) ) 
+    df_cold['Date max SSTa']  = list(np.array(date_min_c))
     
     df_warm["Start date"] = df_warm["Start date"].dt.strftime('%Y-%m')
     df_warm["End date"] = df_warm["End date"].dt.strftime('%Y-%m')
@@ -597,7 +616,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
     ax[5].set_title(
         'Standardized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
                     str(ssta_nni.clim_str)[:7] +' --> '+
-                    str(ssta_nni.clim_str)[:7],fontsize=ftz,fontweight='bold')
+                    str(ssta_nni.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax[5].plot(ssta_nni.time,ssta_nni,color='black')
     ax[5].axhline(0,color=color_lines)
     ax[5].axhline(1,color=color_lines,linestyle='--')
@@ -1559,7 +1578,7 @@ def read_compute_anomalies_uwind_plot(data):
     ## Compute the uwnd anomalies ## 
 
 
-    uwnda_atl4,uwnda_atl4_norm = ano_norm_t_wk(uwnd_atl4.uwnd_dtd.load())
+    uwnda_atl4,uwnda_atl4_norm = ano_norm_t(uwnd_atl4.uwnd_dtd.load())
     
     
     f,ax = plt.subplots(1,1,figsize=[15,5])
@@ -1580,13 +1599,15 @@ def read_compute_anomalies_uwind_plot(data):
     ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,1,uwnda_atl4_norm>1,color='red')
     ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,-1,uwnda_atl4_norm<-1,color='blue')
     ax.set_title('Normalized UWND anomalies ATL4 [40$^{\circ}$W-20$^{\circ}$W; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
-                 str(uwnda_atl4_norm.time.values[0])[:7] +' --> '+
-                 str(uwnda_atl4_norm.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+                 str(uwnda_atl4_norm.clim_str)[:7] +' --> '+
+                 str(uwnda_atl4_norm.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
            size=ftz,
            weight='bold')
     ax.set_ylim([-3,3])
     return uwnda_atl4_norm
+
+
     
     
 def plot_slp(ncep_data_slp):
