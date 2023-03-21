@@ -1598,13 +1598,13 @@ def read_compute_anomalies_uwind_plot(data):
     ax.tick_params(labelsize=ftz)
     ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,1,uwnda_atl4_norm>1,color='red')
     ax.fill_between(uwnda_atl4_norm.time.values,uwnda_atl4_norm,-1,uwnda_atl4_norm<-1,color='blue')
-    ax.set_title('Normalized UWND anomalies ATL4 [40$^{\circ}$W-20$^{\circ}$W; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
+    ax.set_title('Standardized UWND anomalies ATL4 [40$^{\circ}$W-20$^{\circ}$W; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
                  str(uwnda_atl4_norm.clim_str)[:7] +' --> '+
                  str(uwnda_atl4_norm.clim_end)[:7],fontsize=ftz,fontweight='bold')
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
            size=ftz,
            weight='bold')
-    ax.set_ylim([-3,3])
+    ax.set_ylim([-4,4])
     return uwnda_atl4_norm
 
 
@@ -1717,8 +1717,8 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     ax[0].plot(x, ci_forecast_uwnda_ssta[1], 'grey')
     ax[0].fill_between(x,y,ci_forecast_uwnda_ssta[0],color='grey',alpha=0.15)
     ax[0].fill_between(x,y,ci_forecast_uwnda_ssta[1],color='grey',alpha=0.15)
-    ax[0].set_xlim([-2.5,2.5])
-    ax[0].set_ylim([-2.5,2.5])
+    ax[0].set_xlim([-3,3])
+    ax[0].set_ylim([-3,3])
     ax[0].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
     ax[0].set_xlabel('ATL4-averaged MAM UWNDa',fontsize=ftz,fontweight='bold')
     ax[0].tick_params(labelsize=ftz)
@@ -1789,8 +1789,8 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     ax[1].plot(x, ci_forecast_uwnda_ssta_1[1], 'grey')
     ax[1].fill_between(x,y1,ci_forecast_uwnda_ssta_1[0],color='grey',alpha=0.15)
     ax[1].fill_between(x,y1,ci_forecast_uwnda_ssta_1[1],color='grey',alpha=0.15)
-    ax[1].set_xlim([-2.5,2.5])
-    ax[1].set_ylim([-2.5,2.5])
+    ax[1].set_xlim([-3,3])
+    ax[1].set_ylim([-3,3])
     ax[1].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
     ax[1].set_xlabel('ATL4-averaged JJA UWNDa',fontsize=ftz,fontweight='bold')
     ax[1].tick_params(labelsize=ftz)
