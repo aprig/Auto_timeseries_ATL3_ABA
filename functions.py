@@ -1649,8 +1649,11 @@ def plot_slp(ncep_data_slp):
     ax.xaxis.set_minor_locator(years_minor)
     myFmt = mdates.DateFormatter('%Y')
     ax.xaxis.set_major_formatter(myFmt)
+    
+    
+    
 def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
-    if now.month<8:
+    if now.month>8:
         uwnda_atl4= uwnda_atl4.sel(time=slice(datetime.datetime(1982, 1, 1), datetime.datetime(now.year, 12, 1)))
         ssta_atl3= ssta_atl3.sel(time=slice(datetime.datetime(1982, 1, 1), datetime.datetime(now.year, 12, 1)))
     elif now.month<=8:
@@ -1666,7 +1669,7 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     ssta_atl3_jja = ssta_atl3.sel(time=is_jja(
         ssta_atl3['time.month'])).groupby('time.year').mean() 
 
-    x = np.arange(-3,3,0.1)
+    x = np.arange(-4,4.1,0.1)
     m, b, r_val, p_val, std_err = stats.linregress(np.array(uwnda_atl4_mam),np.array(ssta_atl3_jja))
     y = m*x+b
     n_replicate = 10000
@@ -1722,10 +1725,10 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     ax[0].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
     ax[0].set_xlabel('ATL4-averaged MAM UWNDa',fontsize=ftz,fontweight='bold')
     ax[0].tick_params(labelsize=ftz)
-    ax[0].text(1,2,'Canonical',fontsize=ftz,fontweight='bold')
-    ax[0].text(-2,-2,'Canonical',fontsize=ftz,fontweight='bold')
-    ax[0].text(1,-2,'Non-Canonical',fontsize=ftz,fontweight='bold')
-    ax[0].text(-2,2,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(1,2.5,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(-2,-2.5,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(1,-2.5,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[0].text(-2,2.5,'Non-Canonical',fontsize=ftz,fontweight='bold')
     textstr = '\n'.join((r'$s=%.2f$ $\pm$ %.2f' %
                      (m, std_err),
                      r'$R^{2}=%.2f$' % (r_val**2, ),
@@ -1740,7 +1743,7 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
          bbox=props)
     
     
-    x = np.arange(-3,3,0.1)
+    x = np.arange(-4,4.1,0.1)
     m1, b1, r_val, p_val, std_err = stats.linregress(np.array(uwnda_atl4_jja),np.array(ssta_atl3_jja))
     y1 = m1*x+b1
     n_replicate = 10000
@@ -1794,10 +1797,10 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
     ax[1].set_ylabel('ATL3-averaged JJA SSTa',fontsize=ftz,fontweight='bold')
     ax[1].set_xlabel('ATL4-averaged JJA UWNDa',fontsize=ftz,fontweight='bold')
     ax[1].tick_params(labelsize=ftz)
-    ax[1].text(1,2,'Canonical',fontsize=ftz,fontweight='bold')
-    ax[1].text(-2,-2,'Canonical',fontsize=ftz,fontweight='bold')
-    ax[1].text(1,-2,'Non-Canonical',fontsize=ftz,fontweight='bold')
-    ax[1].text(-2,2,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(1,2.5,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(-2,-2.5,'Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(1,-2.5,'Non-Canonical',fontsize=ftz,fontweight='bold')
+    ax[1].text(-2,2.5,'Non-Canonical',fontsize=ftz,fontweight='bold')
     textstr = '\n'.join((r'$s=%.2f$ $\pm$ %.2f' %
                      (m1, std_err),
                      r'$R^{2}=%.2f$' % (r_val**2, ),
