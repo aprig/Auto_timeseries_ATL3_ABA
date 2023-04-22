@@ -1,6 +1,6 @@
 
 # Author: Arthur Prigent
-# Email: aprigent@geomar.de
+# Email: prigent.arthur29@gmail.com
 
 import numpy as np
 import pandas as pd
@@ -237,7 +237,9 @@ def read_data_compute_anomalies_oi(path_data):
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
-    
+    weights = np.cos(np.deg2rad(sst.lat))
+    weights.name = "weights"
+    sst = sst.weighted(weights)
     ## Make sub areas ##
     sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
                            (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
