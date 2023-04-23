@@ -19,8 +19,7 @@ now = datetime.now()
 print(now)
 date_time = now.strftime("%d/%m/%Y")
 import matplotlib
-import hvplot.pandas  # noqa
-import hvplot.xarray  # noqa
+
 import requests
 
 
@@ -182,51 +181,6 @@ def ano_norm_t_wk(ds):
     return ano, ano_std 
 
 
-def read_data_compute_anomalies_week(path_data):
-    
-    ds = xr.open_dataset(path_data+'sst.wkmean.1990-present.nc',engine='pydap')
-    mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
-    ds = ds.sst.where(mask.mask[0,:,:]==1)
-    sst= ds.sel(time=slice(datetime.datetime(1990, 1, 1), now))
-    sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
-    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
-    
-    ## Make sub areas ##
-    sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
-                           (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
-    sst_nino34 = sst.where(( sst.lon>=-170) & (sst.lon<=-120) &
-                           (sst.lat<=5) & (sst.lat>=-5),drop=True).mean(dim='lon').mean(dim='lat')
-    sst_aba = sst.where((  sst.lon>=8) & (sst.lon<=16) &
-                           (sst.lat<=-10) & (sst.lat>=-20),drop=True).mean(dim='lon').mean(dim='lat')
-    sst_dni = sst.where((  sst.lon>=-21) & (sst.lon<=-17) &
-                           (sst.lat<=17) & (sst.lat>=9),drop=True).mean(dim='lon').mean(dim='lat')
-    sst_cni = sst.where((  sst.lon>=-120) & (sst.lon<=-110) &
-                           (sst.lat<=30) & (sst.lat>=20),drop=True).mean(dim='lon').mean(dim='lat')
-    sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
-                           (sst.lat<=-22) & (sst.lat>=-28),drop=True).mean(dim='lon').mean(dim='lat')
-    
-   
-    ## Linearly detrend the data ## 
-    sst_atl3 = sst_atl3.assign_coords(sst_dtd=('time',  nandetrend(sst_atl3.values)))
-    sst_nino34 = sst_nino34.assign_coords(sst_dtd=('time',  nandetrend(sst_nino34.values)))
-    sst_aba = sst_aba.assign_coords(sst_dtd=('time',  nandetrend(sst_aba.values)))
-    sst_dni = sst_dni.assign_coords(sst_dtd=('time',  nandetrend(sst_dni.values)))
-    sst_cni = sst_cni.assign_coords(sst_dtd=('time',  nandetrend(sst_cni.values)))
-    sst_nni = sst_nni.assign_coords(sst_dtd=('time',  nandetrend(sst_nni.values)))
-
-    ## Compute the SST anomalies ## 
-
-    
-    ssta_atl3,ssta_atl3_norm = ano_norm_t_wk(sst_atl3.sst_dtd.load())
-    ssta_nino34,ssta_nino34_norm = ano_norm_t_wk(sst_nino34.sst_dtd.load())
-    ssta_aba,ssta_aba_norm = ano_norm_t_wk(sst_aba.sst_dtd.load())
-    ssta_dni,ssta_dni_norm = ano_norm_t_wk(sst_dni.sst_dtd.load())
-    ssta_cni,ssta_cni_norm = ano_norm_t_wk(sst_cni.sst_dtd.load())
-    ssta_nni,ssta_nni_norm = ano_norm_t_wk(sst_nni.sst_dtd.load())
-    
-    
-    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
-
 
 def read_data_compute_anomalies_oi(path_data):
     
@@ -237,27 +191,43 @@ def read_data_compute_anomalies_oi(path_data):
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
     
-    weights = np.cos(np.deg2rad(sst.lat))
-    weights.name = "weights"
-    sst = sst.weighted(weights)
+
     ## Make sub areas ##
     sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
-                           (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=3) & (sst.lat>=-3),drop=True)
+    sst_atl3 = sst_atl3.weighted(np.cos(np.deg2rad(sst_atl3.lat))).mean(('lon','lat'))
+    
     sst_nino34 = sst.where(( sst.lon>=-170) & (sst.lon<=-120) &
-                           (sst.lat<=5) & (sst.lat>=-5),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    sst_nino34 = sst_nino34.weighted(np.cos(np.deg2rad(sst_nino34.lat))).mean(('lon','lat'))
+    
     sst_aba = sst.where((  sst.lon>=8) & (sst.lon<=16) &
-                           (sst.lat<=-10) & (sst.lat>=-20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-10) & (sst.lat>=-20),drop=True)
+    sst_aba = sst_aba.weighted(np.cos(np.deg2rad(sst_aba.lat))).mean(('lon','lat'))
+ 
     sst_dni = sst.where((  sst.lon>=-21) & (sst.lon<=-17) &
-                           (sst.lat<=17) & (sst.lat>=9),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=17) & (sst.lat>=9),drop=True)
+    sst_dni = sst_dni.weighted(np.cos(np.deg2rad(sst_dni.lat))).mean(('lon','lat'))
+    
+    
     sst_cni = sst.where((  sst.lon>=-120) & (sst.lon<=-110) &
-                           (sst.lat<=30) & (sst.lat>=20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=30) & (sst.lat>=20),drop=True)
+    sst_cni = sst_cni.weighted(np.cos(np.deg2rad(sst_cni.lat))).mean(('lon','lat'))
+    
+    
     sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
-                           (sst.lat<=-22) & (sst.lat>=-28),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-22) & (sst.lat>=-28),drop=True)
+    sst_nni = sst_nni.weighted(np.cos(np.deg2rad(sst_nni.lat))).mean(('lon','lat'))
+    
+    
     sst_iod_w = sst.where((  sst.lon>=50) & (sst.lon<=70) &
-                           (sst.lat<=10) & (sst.lat>=-10),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_w = sst_iod_w.weighted(np.cos(np.deg2rad(sst_iod_w.lat))).mean(('lon','lat'))
+    
     
     sst_iod_e = sst.where((  sst.lon>=90) & (sst.lon<=110) &
-                           (sst.lat<=10) & (sst.lat>=-10),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_e = sst_iod_e.weighted(np.cos(np.deg2rad(sst_iod_e.lat))).mean(('lon','lat'))
     
    
     ## Linearly detrend the data ## 
@@ -296,20 +266,41 @@ def read_data_compute_anomalies(path_data):
     
     
     ## Make sub areas ##
-    sst_atl3_not_detrended = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
-                           (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
     sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
-                           (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=3) & (sst.lat>=-3),drop=True)
+    sst_atl3 = sst_atl3.weighted(np.cos(np.deg2rad(sst_atl3.lat))).mean(('lon','lat'))
+    
     sst_nino34 = sst.where(( sst.lon>=-170) & (sst.lon<=-120) &
-                           (sst.lat<=5) & (sst.lat>=-5),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    sst_nino34 = sst_nino34.weighted(np.cos(np.deg2rad(sst_nino34.lat))).mean(('lon','lat'))
+    
     sst_aba = sst.where((  sst.lon>=8) & (sst.lon<=16) &
-                           (sst.lat<=-10) & (sst.lat>=-20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-10) & (sst.lat>=-20),drop=True)
+    sst_aba = sst_aba.weighted(np.cos(np.deg2rad(sst_aba.lat))).mean(('lon','lat'))
+ 
     sst_dni = sst.where((  sst.lon>=-21) & (sst.lon<=-17) &
-                           (sst.lat<=17) & (sst.lat>=9),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=17) & (sst.lat>=9),drop=True)
+    sst_dni = sst_dni.weighted(np.cos(np.deg2rad(sst_dni.lat))).mean(('lon','lat'))
+    
+    
     sst_cni = sst.where((  sst.lon>=-120) & (sst.lon<=-110) &
-                           (sst.lat<=30) & (sst.lat>=20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=30) & (sst.lat>=20),drop=True)
+    sst_cni = sst_cni.weighted(np.cos(np.deg2rad(sst_cni.lat))).mean(('lon','lat'))
+    
+    
     sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
-                           (sst.lat<=-22) & (sst.lat>=-28),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-22) & (sst.lat>=-28),drop=True)
+    sst_nni = sst_nni.weighted(np.cos(np.deg2rad(sst_nni.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_w = sst.where((  sst.lon>=50) & (sst.lon<=70) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_w = sst_iod_w.weighted(np.cos(np.deg2rad(sst_iod_w.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_e = sst.where((  sst.lon>=90) & (sst.lon<=110) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_e = sst_iod_e.weighted(np.cos(np.deg2rad(sst_iod_e.lat))).mean(('lon','lat'))
     
    
     ## Linearly detrend the data ## 
@@ -343,17 +334,40 @@ def read_data_compute_anomalies_ersstv5(path_data):
     
     ## Make sub areas ##
     sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
-                           (sst.lat<=3) & (sst.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=3) & (sst.lat>=-3),drop=True)
+    sst_atl3 = sst_atl3.weighted(np.cos(np.deg2rad(sst_atl3.lat))).mean(('lon','lat'))
+    
     sst_nino34 = sst.where(( sst.lon>=-170) & (sst.lon<=-120) &
-                           (sst.lat<=5) & (sst.lat>=-5),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    sst_nino34 = sst_nino34.weighted(np.cos(np.deg2rad(sst_nino34.lat))).mean(('lon','lat'))
+    
     sst_aba = sst.where((  sst.lon>=8) & (sst.lon<=16) &
-                           (sst.lat<=-10) & (sst.lat>=-20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-10) & (sst.lat>=-20),drop=True)
+    sst_aba = sst_aba.weighted(np.cos(np.deg2rad(sst_aba.lat))).mean(('lon','lat'))
+ 
     sst_dni = sst.where((  sst.lon>=-21) & (sst.lon<=-17) &
-                           (sst.lat<=17) & (sst.lat>=9),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=17) & (sst.lat>=9),drop=True)
+    sst_dni = sst_dni.weighted(np.cos(np.deg2rad(sst_dni.lat))).mean(('lon','lat'))
+    
+    
     sst_cni = sst.where((  sst.lon>=-120) & (sst.lon<=-110) &
-                           (sst.lat<=30) & (sst.lat>=20),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=30) & (sst.lat>=20),drop=True)
+    sst_cni = sst_cni.weighted(np.cos(np.deg2rad(sst_cni.lat))).mean(('lon','lat'))
+    
+    
     sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
-                           (sst.lat<=-22) & (sst.lat>=-28),drop=True).mean(dim='lon').mean(dim='lat')
+                           (sst.lat<=-22) & (sst.lat>=-28),drop=True)
+    sst_nni = sst_nni.weighted(np.cos(np.deg2rad(sst_nni.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_w = sst.where((  sst.lon>=50) & (sst.lon<=70) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_w = sst_iod_w.weighted(np.cos(np.deg2rad(sst_iod_w.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_e = sst.where((  sst.lon>=90) & (sst.lon<=110) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_e = sst_iod_e.weighted(np.cos(np.deg2rad(sst_iod_e.lat))).mean(('lon','lat'))
     
    
     ## Linearly detrend the data ## 
@@ -706,281 +720,6 @@ def plot_anomalies_wk_aba(ssta_aba):
     
     
     
-    
-def plot_anomalies_wk_atl3(ssta_atl3):
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
-    color_lines='grey'
-    ftz=15
-    ax=ax.ravel()
-    ssta_atl3_1 = ssta_atl3.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
-    ssta_atl3_2 = ssta_atl3.sel(time=slice(datetime.datetime(2005, 1, 1), now))
-    ### ABA ###
-    ax[0].set_title('Standardized SST anomalies ATL3 [20$^{\circ}$W-0; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
-                    str(ssta_atl3.time.values[0])[:7] +' --> '+
-                    str(ssta_atl3.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].plot(ssta_atl3_1.time,ssta_atl3_1,color='black')
-    ax[0].axhline(0,color=color_lines)
-    ax[0].axhline(1,color=color_lines,linestyle='--')
-    ax[0].axhline(-1,color=color_lines,linestyle='--')
-    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[0].xaxis.set_major_locator(years)
-    ax[0].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[0].xaxis.set_major_formatter(myFmt)
-    ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_atl3_1.time.values,ssta_atl3_1,1,ssta_atl3_1>1,color='red')
-    ax[0].fill_between(ssta_atl3_1.time.values,ssta_atl3_1,-1,ssta_atl3_1<-1,color='blue')
-    ax[0].set_ylim([-4,4])
-    
-    
-
-    ### ABA ###
-    ax[1].set_title('Standardized SST anomalies ATL3 [20$^{\circ}$W-0; 3$^{\circ}$S-3$^{\circ}$N] | Baseline '+
-                    str(ssta_atl3.time.values[0])[:7] +' --> '+
-                    str(ssta_atl3.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[1].plot(ssta_atl3_2.time,ssta_atl3_2,color='black')
-    ax[1].axhline(0,color=color_lines)
-    ax[1].axhline(1,color=color_lines,linestyle='--')
-    ax[1].axhline(-1,color=color_lines,linestyle='--')
-    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[1].xaxis.set_major_locator(years)
-    ax[1].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[1].xaxis.set_major_formatter(myFmt)
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_atl3_2.time.values,ssta_atl3_2,1,ssta_atl3_2>1,color='red')
-    ax[1].fill_between(ssta_atl3_2.time.values,ssta_atl3_2,-1,ssta_atl3_2<-1,color='blue')
-    ax[1].set_ylim([-4,4])
-    
-    
-def plot_anomalies_wk_nino34(ssta_nino34):
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
-    color_lines='grey'
-    ftz=15
-    ax=ax.ravel()
-    ssta_nino34_1 = ssta_nino34.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
-    ssta_nino34_2 = ssta_nino34.sel(time=slice(datetime.datetime(2005, 1, 1), now))
-    ### NINO3.4 ###
-    ax[0].set_title('Standardized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
-                    str(ssta_nino34.time.values[0])[:7] +' --> '+
-                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].plot(ssta_nino34_1.time,ssta_nino34_1,color='black')
-    ax[0].axhline(0,color=color_lines)
-    ax[0].axhline(1,color=color_lines,linestyle='--')
-    ax[0].axhline(-1,color=color_lines,linestyle='--')
-    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[0].xaxis.set_major_locator(years)
-    ax[0].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[0].xaxis.set_major_formatter(myFmt)
-    ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,1,ssta_nino34_1>1,color='red')
-    ax[0].fill_between(ssta_nino34_1.time.values,ssta_nino34_1,-1,ssta_nino34_1<-1,color='blue')
-    ax[0].set_ylim([-4,4])
-    
-    
-
-    ### NINO3.4 ###
-    ax[1].set_title('Standardized SST anomalies NINO3.4 [170$^{\circ}$W-120$^{\circ}$W; 5$^{\circ}$S-5$^{\circ}$N] | Baseline '+
-                    str(ssta_nino34.time.values[0])[:7] +' --> '+
-                    str(ssta_nino34.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[1].plot(ssta_nino34_2.time,ssta_nino34_2,color='black')
-    ax[1].axhline(0,color=color_lines)
-    ax[1].axhline(1,color=color_lines,linestyle='--')
-    ax[1].axhline(-1,color=color_lines,linestyle='--')
-    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[1].xaxis.set_major_locator(years)
-    ax[1].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[1].xaxis.set_major_formatter(myFmt)
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,1,ssta_nino34_2>1,color='red')
-    ax[1].fill_between(ssta_nino34_2.time.values,ssta_nino34_2,-1,ssta_nino34_2<-1,color='blue')
-    ax[1].set_ylim([-4,4])
-    
-def plot_anomalies_wk_dni(ssta_dni):
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
-    color_lines='grey'
-    ftz=15
-    ax=ax.ravel()
-    ssta_dni_1 = ssta_dni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
-    ssta_dni_2 = ssta_dni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
-    ### NINO3.4 ###
-    ax[0].set_title('Standardized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
-                    str(ssta_dni.time.values[0])[:7] +' --> '+
-                    str(ssta_dni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].plot(ssta_dni_1.time,ssta_dni_1,color='black')
-    ax[0].axhline(0,color=color_lines)
-    ax[0].axhline(1,color=color_lines,linestyle='--')
-    ax[0].axhline(-1,color=color_lines,linestyle='--')
-    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[0].xaxis.set_major_locator(years)
-    ax[0].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[0].xaxis.set_major_formatter(myFmt)
-    ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,1,ssta_dni_1>1,color='red')
-    ax[0].fill_between(ssta_dni_1.time.values,ssta_dni_1,-1,ssta_dni_1<-1,color='blue')
-    ax[0].set_ylim([-4,4])
-    
-    
-
-    ### NINO3.4 ###
-    ax[1].set_title('Standardized SST anomalies DNI [17$^{\circ}$W-21$^{\circ}$W; 9$^{\circ}$N-14$^{\circ}$N] | Baseline '+
-                    str(ssta_dni.time.values[0])[:7] +' --> '+
-                    str(ssta_dni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[1].plot(ssta_dni_2.time,ssta_dni_2,color='black')
-    ax[1].axhline(0,color=color_lines)
-    ax[1].axhline(1,color=color_lines,linestyle='--')
-    ax[1].axhline(-1,color=color_lines,linestyle='--')
-    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[1].xaxis.set_major_locator(years)
-    ax[1].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[1].xaxis.set_major_formatter(myFmt)
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,1,ssta_dni_2>1,color='red')
-    ax[1].fill_between(ssta_dni_2.time.values,ssta_dni_2,-1,ssta_dni_2<-1,color='blue')
-    ax[1].set_ylim([-4,4]) 
-    
-    
-def plot_anomalies_wk_nni(ssta_nni):
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
-    color_lines='grey'
-    ftz=15
-    ax=ax.ravel()
-    ssta_nni_1 = ssta_nni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
-    ssta_nni_2 = ssta_nni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
-    ### NINO3.4 ###
-    ax[0].set_title('Standardized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
-                    str(ssta_nni.time.values[0])[:7] +' --> '+
-                    str(ssta_nni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].plot(ssta_nni_1.time,ssta_nni_1,color='black')
-    ax[0].axhline(0,color=color_lines)
-    ax[0].axhline(1,color=color_lines,linestyle='--')
-    ax[0].axhline(-1,color=color_lines,linestyle='--')
-    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[0].xaxis.set_major_locator(years)
-    ax[0].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[0].xaxis.set_major_formatter(myFmt)
-    ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,1,ssta_nni_1>1,color='red')
-    ax[0].fill_between(ssta_nni_1.time.values,ssta_nni_1,-1,ssta_nni_1<-1,color='blue')
-    ax[0].set_ylim([-4,4])
-    
-    
-
-    ### NINO3.4 ###
-    ax[1].set_title('Standardized SST anomalies NNI [108$^{\circ}$E-115$^{\circ}$E; 28$^{\circ}$S-22$^{\circ}$N] | Baseline '+
-                    str(ssta_nni.time.values[0])[:7] +' --> '+
-                    str(ssta_nni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[1].plot(ssta_nni_2.time,ssta_nni_2,color='black')
-    ax[1].axhline(0,color=color_lines)
-    ax[1].axhline(1,color=color_lines,linestyle='--')
-    ax[1].axhline(-1,color=color_lines,linestyle='--')
-    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[1].xaxis.set_major_locator(years)
-    ax[1].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[1].xaxis.set_major_formatter(myFmt)
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,1,ssta_nni_2>1,color='red')
-    ax[1].fill_between(ssta_nni_2.time.values,ssta_nni_2,-1,ssta_nni_2<-1,color='blue')
-    ax[1].set_ylim([-4,4]) 
-    
-def plot_anomalies_wk_cni(ssta_cni):
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
-    color_lines='grey'
-    ftz=15
-    ax=ax.ravel()
-    ssta_cni_1 = ssta_cni.sel(time=slice(datetime.datetime(1990, 1, 1), datetime.datetime(2004, 12, 1)))
-    ssta_cni_2 = ssta_cni.sel(time=slice(datetime.datetime(2005, 1, 1), now))
-    ### NINO3.4 ###
-    ax[0].set_title('Standardized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
-                    str(ssta_cni.time.values[0])[:7] +' --> '+
-                    str(ssta_cni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].plot(ssta_cni_1.time,ssta_cni_1,color='black')
-    ax[0].axhline(0,color=color_lines)
-    ax[0].axhline(1,color=color_lines,linestyle='--')
-    ax[0].axhline(-1,color=color_lines,linestyle='--')
-    ax[0].text(0.01,0.04,'Updated '+date_time,transform=ax[0].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[0].xaxis.set_major_locator(years)
-    ax[0].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[0].xaxis.set_major_formatter(myFmt)
-    ax[0].tick_params(labelsize=ftz)
-    ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,1,ssta_cni_1>1,color='red')
-    ax[0].fill_between(ssta_cni_1.time.values,ssta_cni_1,-1,ssta_cni_1<-1,color='blue')
-    ax[0].set_ylim([-4,4])
-    
-    
-
-    ### NINO3.4 ###
-    ax[1].set_title('Standardized SST anomalies CNI [110$^{\circ}$W-120$^{\circ}$W; 20$^{\circ}$N-30$^{\circ}$N] | Baseline '+
-                    str(ssta_cni.time.values[0])[:7] +' --> '+
-                    str(ssta_cni.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[1].plot(ssta_cni_2.time,ssta_cni_2,color='black')
-    ax[1].axhline(0,color=color_lines)
-    ax[1].axhline(1,color=color_lines,linestyle='--')
-    ax[1].axhline(-1,color=color_lines,linestyle='--')
-    ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
-           size=ftz,
-           weight='bold')
-    years = mdates.YearLocator(5)   # every 5 years
-    years_minor = mdates.YearLocator(1)  # every year
-    ax[1].xaxis.set_major_locator(years)
-    ax[1].xaxis.set_minor_locator(years_minor)
-    myFmt = mdates.DateFormatter('%Y')
-    ax[1].xaxis.set_major_formatter(myFmt)
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,1,ssta_cni_2>1,color='red')
-    ax[1].fill_between(ssta_cni_2.time.values,ssta_cni_2,-1,ssta_cni_2<-1,color='blue')
-    ax[1].set_ylim([-4,4]) 
-    
-#import cartopy.crs as ccrs
-#import cartopy    
 import matplotlib.patches as mpatches
 
 
@@ -1113,78 +852,7 @@ def read_data_compute_anomalies_map_pac(path_data):
                                 'lon':(np.array(ssta_pac.lon))})
     return ssta_data
 
-    
-    
-#def plot_map_ssta_pac(ssta_pac):
-#    f = plt.figure(figsize=[15,15])
-#    n=45
-#    x = 0.9
-#    ftz=15
-#    lower = plt.cm.Blues_r(np.linspace(0, x, n))
-#    white = np.ones((100-2*n,4))
-#    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
-#    colors = np.vstack((lower, white, upper))
-#    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-#    bounds= np.arange(-3,3.5,0.5)
-#    ftz=15
-#    minlon = -180
-#    maxlon = -60
-#    minlat = -35
-#    maxlat = 35
-#    ax = plt.axes(projection=ccrs.PlateCarree())
-#    cax = inset_axes(ax,
-#                   width="100%",  # width = 5% of parent_bbox width
-#                   height="5%",  # height : 50%
-#                   loc='lower left',
-#                   bbox_to_anchor=(0, -0.1, 1, 1),
-#                   bbox_transform=ax.transAxes,
-#                   borderpad=0,
-#                   )
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines()
-#    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
-#    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-#                      linewidth=2, color='black', alpha=0.5, linestyle='-')
-#    gl.xlabels_top = False
-#    gl.ylabels_right = False
-#    gl.xlabel_style = {'size': 15, 'color': 'black'}
-#    gl.ylabel_style = {'size': 15, 'color': 'black'}
-#    gl.xlocator = mticker.FixedLocator([-160,-140,-120,-100,-80])
-#    gl.ylocator = mticker.FixedLocator([-20, 0,20])
-#    ax.coastlines(linewidth=1)
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines(resolution='50m', color='black', linewidth=1)
-#    p0=ax.contourf(ssta_pac.lon,
-#                ssta_pac.lat,
-#                ssta_pac[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
-#    cbar = plt.colorbar(p0,cax,orientation='horizontal')
-#    cbar.ax.tick_params(labelsize=ftz)
-#    ax.set_title('Normalized SST anomalies '+str(ssta_pac.time.values[-1])[:7]+' | Baseline '+
-#                    str(ssta_pac.time.values[0])[:7] +' --> '+
-#                    str(ssta_pac.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-#    
-#    ax.add_patch(mpatches.Rectangle(xy=[-170, -5], width=50, height=10,
-#                                        fill=None,
-#                                        edgecolor='black',
-#                                        alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(-150, 1, 'NINO3.4',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree())
-#    
-#
-#    ax.add_patch(mpatches.Rectangle(xy=[-120, 20], width=10, height=10,
-#                                        fill=None,
-#                                        edgecolor='grey',
-#                                        alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(-120, 15, 'CNI',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree()) 
-#
-#    
+ 
     
     
 def read_data_compute_anomalies_map_ind(path_data):
@@ -1222,63 +890,7 @@ def read_data_compute_anomalies_map_ind(path_data):
     return ssta_data
 
     
-    
-#def plot_map_ssta_ind(ssta_ind):
-#    f = plt.figure(figsize=[15,15])
-#    n=45
-#    x = 0.9
-#    ftz=15
-#    lower = plt.cm.Blues_r(np.linspace(0, x, n))
-#    white = np.ones((100-2*n,4))
-#    upper = plt.cm.Reds(np.linspace(1-x, 1, n))
-#    colors = np.vstack((lower, white, upper))
-#    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('terrain_map_white', colors)
-#    bounds= np.arange(-3,3.5,0.5)
-#    ftz=15
-#    minlon = 30
-#    maxlon = 170
-#    minlat = -35
-#    maxlat = 35
-#    ax = plt.axes(projection=ccrs.PlateCarree())
-#    cax = inset_axes(ax,
-#                   width="100%",  # width = 5% of parent_bbox width
-#                   height="5%",  # height : 50%
-#                   loc='lower left',
-#                   bbox_to_anchor=(0, -0.1, 1, 1),
-#                   bbox_transform=ax.transAxes,
-#                   borderpad=0,
-#                   )
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines()
-#    ax.set_extent([minlon,maxlon,minlat,maxlat],ccrs.PlateCarree())
-#    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-#                      linewidth=2, color='black', alpha=0.5, linestyle='-')
-#    gl.xlabels_top = False
-#    gl.ylabels_right = False
-#    gl.xlabel_style = {'size': 15, 'color': 'black'}
-#    gl.ylabel_style = {'size': 15, 'color': 'black'}
-#    gl.xlocator = mticker.FixedLocator([30,50,70,90,110,130,150])
-#    gl.ylocator = mticker.FixedLocator([-20, 0,20])
-#    ax.coastlines(linewidth=1)
-#    ax.add_feature(cartopy.feature.LAND, edgecolor='black',color='lightgrey')
-#    ax.coastlines(resolution='50m', color='black', linewidth=1)
-#    p0=ax.contourf(ssta_ind.lon,
-#                ssta_ind.lat,
-#                ssta_ind[-1,:,:],transform=ccrs.PlateCarree(),cmap=cmap,levels=bounds,extend='both')
-#    cbar = plt.colorbar(p0,cax,orientation='horizontal')
-#    cbar.ax.tick_params(labelsize=ftz)
-#    ax.set_title('Normalized SST anomalies '+str(ssta_ind.time.values[-1])[:7]+' | Baseline '+
-#                    str(ssta_ind.time.values[0])[:7] +' --> '+
-#                    str(ssta_ind.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-#    
-#    ax.add_patch(mpatches.Rectangle(xy=[108, -28], width=7, height=6,edgecolor='pink',fill=None,
-#                                        alpha=1,linewidth=4,
-#                                        transform=ccrs.PlateCarree()))
-#
-#    ax.text(108, -32, 'NNI',
-#             horizontalalignment='left',fontsize=ftz,fontweight='bold',
-#             transform=ccrs.PlateCarree()) 
-#
+
 
 def plot_wamoi(cmap_data):
 
@@ -1291,12 +903,18 @@ def plot_wamoi(cmap_data):
     
     
     precip_NI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
-                               (precip.lat<=20) & (precip.lat>=7.5),drop=True).mean(dim='lon').mean(dim='lat')
+                               (precip.lat<=20) & (precip.lat>=7.5),drop=True)
+    
+
+    precip_NI = precip_NI.weighted(np.cos(np.deg2rad(precip_NI.lat))).mean(('lon','lat'))
+
     
     precip_SI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
-                               (precip.lat<=7.5) & (precip.lat>=0),drop=True).mean(dim='lon').mean(dim='lat')
+                               (precip.lat<=7.5) & (precip.lat>=0),drop=True)
+    precip_SI = precip_SI.weighted(np.cos(np.deg2rad(precip_SI.lat))).mean(('lon','lat'))
     
-    # standardize
+    
+    # standardized
     precip_NI_std = precip_NI/precip_NI.std(dim='time')
     precip_SI_std = precip_SI/precip_SI.std(dim='time')
     
@@ -1568,7 +1186,8 @@ def read_compute_anomalies_uwind_plot(data):
 
     ## Make sub areas ##
     uwnd_atl4 = uwnd.where((  uwnd.lon>=-40) & (uwnd.lon<=-20) &
-                           (uwnd.lat<=3) & (uwnd.lat>=-3),drop=True).mean(dim='lon').mean(dim='lat')
+                           (uwnd.lat<=3) & (uwnd.lat>=-3),drop=True)
+    uwnd_atl4 = uwnd_atl4.weighted(np.cos(np.deg2rad(uwnd_atl4.lat))).mean(('lon','lat'))
 
 
     ## Linearly detrend the data ## 
@@ -1618,7 +1237,9 @@ def plot_slp(ncep_data_slp):
     slp = xr.concat([ds.slp[:, :, 72:], ds.slp[:, :, :72]], dim='lon')
     slp.coords['lon'] = (slp.coords['lon'] + 180) % 360 - 180
     slp_atl = slp.where((  slp.lon>=-30) & (slp.lon<=-10) &
-                           (slp.lat<=-20) & (slp.lat>=-40),drop=True).mean(dim='lon').mean(dim='lat')
+                           (slp.lat<=-20) & (slp.lat>=-40),drop=True)
+    slp_atl = slp_atl.weighted(np.cos(np.deg2rad(slp_atl.lat))).mean(('lon','lat'))
+    
 
 
     ## Linearly detrend the data ## 
@@ -1815,6 +1436,7 @@ def plot_canonical_atlantic_ninos(uwnda_atl4,ssta_atl3):
          fontsize=ftz-5,
          verticalalignment='top',
          bbox=props)
+    
 def plot_IOD(iod_index):
     f,ax = plt.subplots(1,1,figsize=[15,5])
     ftz=15
@@ -1838,7 +1460,7 @@ def plot_IOD(iod_index):
     myFmt = mdates.DateFormatter('%Y')
     ax.xaxis.set_major_formatter(myFmt)
     ax.set_ylim([-2,2])
-    ax.set_ylabel('[$^{\circ}$C]',fontsize=ftz)
+
     
     
     
