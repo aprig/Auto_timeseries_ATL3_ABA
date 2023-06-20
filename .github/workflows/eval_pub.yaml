@@ -53,7 +53,7 @@ jobs:
         if: ${{ always() }}
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=2000 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute plot_daily_PIRATA.ipynb  --output-dir='./ci_out' --to html
+        #  jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute plot_daily_PIRATA.ipynb  --output-dir='./ci_out' --to html
         # jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute make_map_tropical_atlantic_daily_anom.ipynb  --output-dir='./ci_out' --to html
         # jupyter nbconvert --ExecutePreprocessor.timeout=1000 --execute hovmoller_eq_SST_Z20_UAS.ipynb  --output-dir='./ci_out' --to html
         # jupyter nbconvert --ExecutePreprocessor.timeout=1500 --execute plot_daily_sla_NRT.ipynb  --output-dir='./ci_out' --to html
