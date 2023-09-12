@@ -1124,7 +1124,54 @@ def read_data_ACT_week_plot(path_data):
                weight='bold')
     
     return sst_act
+def plot_amo_new(data_amo):
+    ftz=15
+    df = pd.read_csv(data_amo, skiprows=1) 
+    AMO_tmp = []
+    k=0
+    while k< ((now.year-1854)*12+(now.month-1)):
+        
 
+        AMO_tmp.append(float(np.array(df.values[k][0].split())[2]))
+        k+=1
+    #float(np.array(df.values[i,0].split())[2])
+
+    AMO = np.array(AMO_tmp)
+
+    time = pd.date_range(start='1/1/1854', periods=AMO.shape[0], freq='M')
+    AMO_ds  = xr.Dataset({'amo': (['time'],AMO[:])}
+
+                                    ,coords={'time':np.array(time)}
+                                    ,attrs={'standard_name': 'AMO',
+                                'long_name': 'Atlantic Multi-decadal Oscillation',
+
+                                'Creation_date':date_time,   
+                                'author': 'Arthur Prigent',
+                                'email': 'aprigent@geomar.de'}
+                                      ) 
+    AMO_ds_nonan = AMO_ds.where(AMO_ds.amo>-90)
+    AMO_ds_nonan_roll = AMO_ds_nonan.amo.rolling(
+        time=120,min_periods =120, center = True).mean()
+    f,ax = plt.subplots(1,1,figsize=[15,5])
+
+
+    ax.plot(AMO_ds_nonan.time,AMO_ds_nonan.amo,color='grey',alpha=0.30)
+    ax.plot(AMO_ds_nonan_roll.time,AMO_ds_nonan_roll,color='black')
+    ax.fill_between(AMO_ds_nonan_roll.time.values,AMO_ds_nonan_roll,0,AMO_ds_nonan_roll>0,color='red')
+    ax.fill_between(AMO_ds_nonan_roll.time.values,AMO_ds_nonan_roll,0,AMO_ds_nonan_roll<0,color='blue')
+    ax.axhline(0,color='black')
+    ax.tick_params(labelsize=ftz)
+    ax.tick_params(labelsize=ftz)
+    ax.set_title('AMO (SST based)',fontsize=ftz,fontweight='bold')
+    years = mdates.YearLocator(20)   # every 20 years
+    years_minor = mdates.YearLocator(10)  # every 10 years
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+               size=ftz,
+               weight='bold')
 
 def plot_amo(data_amo):
     ftz=15
