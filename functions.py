@@ -1274,7 +1274,7 @@ def read_data_ACT_week_plot_new(path_data):
     # Specify formatter
     ax[0].xaxis.set_major_formatter(fmt)
 
-    xtime = pd.date_range(start='1/1/1982', periods=now.year+1-1982, freq='Y')
+    xtime = pd.date_range(start='1/1/1981', periods=now.year+1-1982, freq='Y')
     ax[1].plot(xtime,np.array(onset_date)*7,color='black')
     ax[1].tick_params(labelsize=ftz)
 
