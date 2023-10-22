@@ -1173,7 +1173,49 @@ def plot_amo_new(data_amo):
                size=ftz,
                weight='bold')
     
-    
+
+data_amm = 'https://psl.noaa.gov/data/timeseries/monthly/AMM/ammsst.data'
+
+
+def amm_plot_new(data_amm):
+    ftz=15
+    df = pd.read_csv(data_amm)
+
+    AMM = np.ones((df.values.shape[0])*12)*np.nan
+    for i in range(df.values.shape[0]):
+        #print(i)
+        try:
+            AMM[i*12:(i+1)*12]=(np.array(df.values[i,:][0].split()[1:]).astype(float)[:])
+        except ValueError:
+            pass
+
+    time = pd.date_range(start='1/1/1948', periods=AMM.shape[0], freq='M')
+
+
+
+    amm_dataset = xr.Dataset({'amm': (['time'], AMM)},
+                              coords={ 'time':(np.array(time)),
+                                  })
+
+    amm_dataset = amm_dataset.where(amm_dataset.amm>-99)
+    f,ax = plt.subplots(1,1,figsize=[10,5])
+
+
+    ax.plot(amm_dataset.time[np.isfinite(amm_dataset.amm)],
+            amm_dataset.amm[np.isfinite(amm_dataset.amm)],color='black')
+    ax.axhline(0,color='black')
+    ax.tick_params(labelsize=ftz)
+    ax.set_title('AMM (SST based) | '+str(np.array(amm_dataset.time[np.isfinite(amm_dataset.amm)][-1].values))[:7]+' | Chiang and Vimont (2004)',fontsize=ftz,fontweight='bold')
+    years = mdates.YearLocator(10)   # every 5 years
+    years_minor = mdates.YearLocator(1)  # every year
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_minor_locator(years_minor)
+    myFmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
+           size=ftz,
+           weight='bold')
+    ax.set_ylabel('($^{\circ}$C)',fontsize=ftz)
     
 def read_data_ACT_week_plot_new(path_data):
 
