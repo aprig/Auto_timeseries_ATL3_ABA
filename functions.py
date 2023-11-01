@@ -1129,7 +1129,7 @@ def plot_amo_new(data_amo):
     df = pd.read_csv(data_amo, skiprows=1) 
     AMO_tmp = []
     k=0
-    while k< ((now.year-1854)*12+(now.month-1)):
+    while k< (df.values.shape[0]):
         
 
         AMO_tmp.append(float(np.array(df.values[k][0].split())[2]))
