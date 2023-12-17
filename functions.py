@@ -34,7 +34,7 @@ def nandetrend(y):
     
     x = np.arange(0,y.shape[0],1)
     m, b, r_val, p_val, std_err = stats.linregress(x,np.array(y))
-    y_detrended= np.array(y) - m*x -b
+    y_detrended= np.array(y) - m*x
     return y_detrended
 
 def find_event(timeserie_ano_ABA_file,treshold):
@@ -184,9 +184,9 @@ def ano_norm_t_wk(ds):
 
 def read_data_compute_anomalies_oi(path_data):
     
-    ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
-    mask = xr.open_dataset(path_data+'lsmask.nc',engine='pydap')
-    ds = ds.sst.where(mask.mask[0,:,:]==1)
+    ds = xr.open_dataset(path_data+'sst.mon.mean.nc',engine='pydap')
+    mask = xr.open_dataset(path_data+'lsmask.oisst.nc',engine='pydap')
+    ds = ds.sst.where(mask.lsmask[0,:,:]==1)
     sst= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     sst = xr.concat([sst[:, :, 180:], sst[:, :, :180]], dim='lon')
     sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
@@ -310,6 +310,10 @@ def read_data_compute_anomalies(path_data):
     sst_dni = sst_dni.assign_coords(sst_dtd=('time',  nandetrend(sst_dni.values)))
     sst_cni = sst_cni.assign_coords(sst_dtd=('time',  nandetrend(sst_cni.values)))
     sst_nni = sst_nni.assign_coords(sst_dtd=('time',  nandetrend(sst_nni.values)))
+    sst_iod_w = sst_iod_w.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_w.values)))
+    sst_iod_e = sst_iod_e.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_e.values)))
+
+
 
     ## Compute the SST anomalies ## 
 
@@ -320,9 +324,12 @@ def read_data_compute_anomalies(path_data):
     ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
     ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
     ssta_nni,ssta_nni_norm = ano_norm_t(sst_nni.sst_dtd.load())
+    ssta_iod_w,ssta_iod_w_norm = ano_norm_t(sst_iod_w.sst_dtd.load())
+    ssta_iod_e,ssta_iod_e_norm = ano_norm_t(sst_iod_e.sst_dtd.load())
     
+    iod_index = ssta_iod_w - ssta_iod_e
     
-    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
+    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm,iod_index
 
 
 def read_data_compute_anomalies_ersstv5(path_data):
@@ -377,6 +384,9 @@ def read_data_compute_anomalies_ersstv5(path_data):
     sst_dni = sst_dni.assign_coords(sst_dtd=('time',  nandetrend(sst_dni.values)))
     sst_cni = sst_cni.assign_coords(sst_dtd=('time',  nandetrend(sst_cni.values)))
     sst_nni = sst_nni.assign_coords(sst_dtd=('time',  nandetrend(sst_nni.values)))
+    sst_iod_w = sst_iod_w.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_w.values)))
+    sst_iod_e = sst_iod_e.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_e.values)))
+
 
     ## Compute the SST anomalies ## 
 
@@ -387,9 +397,12 @@ def read_data_compute_anomalies_ersstv5(path_data):
     ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
     ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
     ssta_nni,ssta_nni_norm = ano_norm_t(sst_nni.sst_dtd.load())
+    ssta_iod_w,ssta_iod_w_norm = ano_norm_t(sst_iod_w.sst_dtd.load())
+    ssta_iod_e,ssta_iod_e_norm = ano_norm_t(sst_iod_e.sst_dtd.load())
     
+    iod_index = ssta_iod_w - ssta_iod_e
     
-    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm
+    return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm,iod_index
 
 def create_table_event(ssta):
     warm,cold=find_event(ssta,1)    
@@ -764,6 +777,120 @@ def read_data_compute_anomalies_map_atl(path_data):
 #        coastline=True
 #    )
 #    return plot
+
+
+
+def read_data_ACT_week_plot_ersstv5(path_data):
+
+    ds = xr.open_dataset(path_data+'sst.mnmean.nc',engine='pydap')
+    sst= ds.sst.sel(time=slice(datetime.datetime(1982, 1, 1), now))
+    sst = xr.concat([sst[:, :, 90:], sst[:, :, :90]], dim='lon')
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+
+    ## Make sub areas ##
+    sst_act = sst.where((  sst.lon>=-30) & (sst.lon<=12) &
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    
+    
+    
+    
+    
+    sst_index = np.array(25-sst_act)
+    Sact = np.zeros((sst_act.shape[0]))
+    Tact = np.zeros((sst_act.shape[0]))
+    X = np.ones((sst_act.shape[2]-1,sst_act.shape[1]-1))
+    Y = np.ones((sst_act.shape[2]-1,sst_act.shape[1]-1))
+    lon = np.array(sst_act.lon)
+    lat = np.array(sst_act.lat)
+    for t in range(Sact.shape[0]):
+        tmp_sact=0
+        tmp_tact=0
+        for i in range(sst_act.shape[2]-1):
+            for j in range(sst_act.shape[1]-1):
+
+
+
+                if sst_index[t,j,i]>0:
+
+                    X = haversine.haversine((lon[i], lat[j]),
+                                        (lon[i+1], lat[j]))
+
+                    Y = haversine.haversine((lon[i], lat[j]),
+                                        (lon[i], lat[j+1]))
+                    tmp_sact += X*Y
+                    tmp_tact += X*Y*sst_index[t,j,i]
+
+        Sact[t] =tmp_sact
+        Tact[t] = tmp_tact/Sact[t]
+
+    Sact_dataset = xr.Dataset({'sact': (['time'], Sact)},
+                          coords={ 'time':(np.array(sst_act.time)),
+                              })
+
+
+
+
+
+
+    onset_date=[]
+    for i in range(1982,now.year+1,1):
+        index_tmp = []
+        try:
+
+            sact_clim = Sact_dataset.sact.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+
+
+            for j in range(sact_clim.shape[0]):
+                if sact_clim[j]>0.4*1e6:
+                    index_tmp.append(j)
+            onset_date.append(index_tmp[0])
+
+        except IndexError:
+
+            onset_date.append(np.nan)
+
+
+
+    f,ax = plt.subplots(1,1,figsize=[10,5],sharex=True)
+
+    ftz=15
+    ax.plot(Sact_dataset.time,Sact_dataset.sact*1e-6,color='grey')
+    ax.tick_params(labelsize=ftz)
+    ax.axhline(0.4,color='red',label='treshold = 0.4 1e6 km$^{2}$')
+    ax.legend(fontsize=ftz)
+    ax.set_ylabel('S$_{act}$ [10$^{6}$ km$^{2}$]',fontsize=ftz,fontweight='bold')
+    ax.set_title('Atlantic Cold Tongue Onset',fontsize=ftz,fontweight='bold')
+    ax.set_xlabel('Year', fontsize=ftz)
+
+    locator = mdates.YearLocator(4)  # every month
+    # Specify the format - %b gives us Jan, Feb...
+    fmt = mdates.DateFormatter('%Y')
+    ax.xaxis.set_major_locator(locator)
+    # Specify formatter
+    ax.xaxis.set_major_formatter(fmt)
+
+    #xtime = pd.date_range(start='1/1/1989', periods=now.year+1-1990, freq='Y')
+    #ax[1].plot(xtime,np.array(onset_date)*7,color='black')
+    #ax[1].tick_params(labelsize=ftz)
+    #locator = mdates.YearLocator(2)  # every month
+    ## Specify the format - %b gives us Jan, Feb...
+    #fmt = mdates.DateFormatter('%Y')
+    #ax[1].xaxis.set_major_locator(locator)
+    ## Specify formatter
+    #ax[1].xaxis.set_major_formatter(fmt)
+    #ax[1].set_ylabel('Onset date [Day of year]',fontsize=ftz,fontweight='bold')
+    ##ax[1].axhline(21*7,label='1st June',color='grey')
+    #ax[1].legend(fontsize=ftz)
+    #ax[1].text(0.01,0.04,'Updated '+date_time,transform=ax[1].transAxes,
+    #           size=ftz,
+    #           weight='bold')
+    
+    return sst_act
+
+
+
+
+
 def plot_map_ssta(ssta_data):
     
     
