@@ -51,18 +51,11 @@ jobs:
           du -sh *
 
       - name: Run Jupyter notebook
+        env:
+          USERNAME: ${{ secrets.MAIL_SENDER }}
+          PASSWORD: ${{ secrets.PASSWORD_MAIL }}
         run: |
-          jupyter nbconvert --ExecutePreprocessor.timeout=2000 --to notebook --execute automatic_time_series_SST_timeseries.ipynb
-
-      - name: Save figure
-        run: |
-          pwd  # Print current working directory
-          ls  # List files in the current directory
-          mkdir -p figures/
-          ls figures/  # List files in the figures directory before moving
-          mv test.png figures/
-          ls figures/  # List files in the figures directory after moving
-
+          jupyter nbconvert --ExecutePreprocessor.timeout=2000 --to notebook --execute send_email.ipynb
 
       - name: Convert to HTML
         if: ${{ always() }}
