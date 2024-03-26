@@ -51,10 +51,10 @@ jobs:
           du -sh *
 
       - name: Run Jupyter notebook
-        if: ${{ always() }}
         env:
           USERNAME: ${{ secrets.MAIL_SENDER }}
           PASSWORD: ${{ secrets.PASSWORD_MAIL }}
+        if: ${{ always() }}
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=2000 --to notebook --execute send_email.ipynb
 
