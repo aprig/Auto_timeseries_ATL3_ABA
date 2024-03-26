@@ -56,8 +56,13 @@ jobs:
 
       - name: Save figure
         run: |
+          pwd  # Print current working directory
+          ls  # List files in the current directory
           mkdir -p figures/
+          ls figures/  # List files in the figures directory before moving
           mv test.png figures/
+          ls figures/  # List files in the figures directory after moving
+
 
       - name: Convert to HTML
         if: ${{ always() }}
