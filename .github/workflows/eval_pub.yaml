@@ -56,7 +56,7 @@ jobs:
 
       - name: Save figure
         run: |
-         mkdir -p figures/
+          mkdir -p figures/
           mv test.png figures/
 
       - name: Convert to HTML
