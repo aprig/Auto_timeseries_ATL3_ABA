@@ -49,11 +49,19 @@ jobs:
         if: ${{ always() }}
         run: |
           du -sh *
+
+      - name: Run Jupyter notebook
+        run: |
+          jupyter nbconvert --ExecutePreprocessor.timeout=2000 --to notebook --execute automatic_time_series_SST_timeseries.ipynb
+
+      - name: Save figure
+        run: |
+          mv test.png ci_out/
+
       - name: Convert to HTML
         if: ${{ always() }}
         run: |
           jupyter nbconvert --ExecutePreprocessor.timeout=2000 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
-          jupyter nbconvert --ExecutePreprocessor.timeout=2000 --to notebook --execute automatic_time_series_SST_timeseries.ipynb
 
       - name: Upload notebook
         uses: actions/upload-artifact@v1
