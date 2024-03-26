@@ -56,7 +56,8 @@ jobs:
 
       - name: Save figure
         run: |
-          mv test.png ci_out/
+         mkdir -p figures/
+          mv test.png figures/
 
       - name: Convert to HTML
         if: ${{ always() }}
