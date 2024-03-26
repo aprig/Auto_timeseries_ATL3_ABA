@@ -51,6 +51,7 @@ jobs:
           du -sh *
 
       - name: Run Jupyter notebook
+        if: ${{ always() }}
         env:
           USERNAME: ${{ secrets.MAIL_SENDER }}
           PASSWORD: ${{ secrets.PASSWORD_MAIL }}
