@@ -404,6 +404,85 @@ def read_data_compute_anomalies_ersstv5(path_data):
     
     return ssta_atl3_norm,ssta_aba_norm,ssta_nino34_norm,ssta_dni_norm,ssta_cni_norm,ssta_nni_norm,iod_index
 
+
+
+
+
+
+def read_data_compute_anomalies_ersstv5_for_mail(path_data):
+    
+    ds = xr.open_dataset(path_data,engine='pydap')
+    sst= ds.sst.sel(time=slice(datetime.datetime(1982, 1, 1), now))
+    sst = xr.concat([sst[:, :, 90:], sst[:, :, :90]], dim='lon')
+    sst.coords['lon'] = (sst.coords['lon'] + 180) % 360 - 180  
+    
+    ## Make sub areas ##
+    sst_atl3 = sst.where((  sst.lon>=-20) & (sst.lon<=0) &
+                           (sst.lat<=3) & (sst.lat>=-3),drop=True)
+    sst_atl3 = sst_atl3.weighted(np.cos(np.deg2rad(sst_atl3.lat))).mean(('lon','lat'))
+    
+    sst_nino34 = sst.where(( sst.lon>=-170) & (sst.lon<=-120) &
+                           (sst.lat<=5) & (sst.lat>=-5),drop=True)
+    sst_nino34 = sst_nino34.weighted(np.cos(np.deg2rad(sst_nino34.lat))).mean(('lon','lat'))
+    
+    sst_aba = sst.where((  sst.lon>=8) & (sst.lon<=16) &
+                           (sst.lat<=-10) & (sst.lat>=-20),drop=True)
+    sst_aba = sst_aba.weighted(np.cos(np.deg2rad(sst_aba.lat))).mean(('lon','lat'))
+ 
+    sst_dni = sst.where((  sst.lon>=-21) & (sst.lon<=-17) &
+                           (sst.lat<=17) & (sst.lat>=9),drop=True)
+    sst_dni = sst_dni.weighted(np.cos(np.deg2rad(sst_dni.lat))).mean(('lon','lat'))
+    
+    
+    sst_cni = sst.where((  sst.lon>=-120) & (sst.lon<=-110) &
+                           (sst.lat<=30) & (sst.lat>=20),drop=True)
+    sst_cni = sst_cni.weighted(np.cos(np.deg2rad(sst_cni.lat))).mean(('lon','lat'))
+    
+    
+    sst_nni = sst.where((  sst.lon>=108) & (sst.lon<=115) &
+                           (sst.lat<=-22) & (sst.lat>=-28),drop=True)
+    sst_nni = sst_nni.weighted(np.cos(np.deg2rad(sst_nni.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_w = sst.where((  sst.lon>=50) & (sst.lon<=70) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_w = sst_iod_w.weighted(np.cos(np.deg2rad(sst_iod_w.lat))).mean(('lon','lat'))
+    
+    
+    sst_iod_e = sst.where((  sst.lon>=90) & (sst.lon<=110) &
+                           (sst.lat<=10) & (sst.lat>=-10),drop=True)
+    sst_iod_e = sst_iod_e.weighted(np.cos(np.deg2rad(sst_iod_e.lat))).mean(('lon','lat'))
+    
+   
+    ## Linearly detrend the data ## 
+    sst_atl3 = sst_atl3.assign_coords(sst_dtd=('time',  nandetrend(sst_atl3.values)))
+    sst_nino34 = sst_nino34.assign_coords(sst_dtd=('time',  nandetrend(sst_nino34.values)))
+    sst_aba = sst_aba.assign_coords(sst_dtd=('time',  nandetrend(sst_aba.values)))
+    sst_dni = sst_dni.assign_coords(sst_dtd=('time',  nandetrend(sst_dni.values)))
+    sst_cni = sst_cni.assign_coords(sst_dtd=('time',  nandetrend(sst_cni.values)))
+    sst_nni = sst_nni.assign_coords(sst_dtd=('time',  nandetrend(sst_nni.values)))
+    sst_iod_w = sst_iod_w.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_w.values)))
+    sst_iod_e = sst_iod_e.assign_coords(sst_dtd=('time',  nandetrend(sst_iod_e.values)))
+
+
+    ## Compute the SST anomalies ## 
+
+    
+    ssta_atl3,ssta_atl3_norm = ano_norm_t(sst_atl3.sst_dtd.load())
+    ssta_nino34,ssta_nino34_norm = ano_norm_t(sst_nino34.sst_dtd.load())
+    ssta_aba,ssta_aba_norm = ano_norm_t(sst_aba.sst_dtd.load())
+    ssta_dni,ssta_dni_norm = ano_norm_t(sst_dni.sst_dtd.load())
+    ssta_cni,ssta_cni_norm = ano_norm_t(sst_cni.sst_dtd.load())
+    ssta_nni,ssta_nni_norm = ano_norm_t(sst_nni.sst_dtd.load())
+    ssta_iod_w,ssta_iod_w_norm = ano_norm_t(sst_iod_w.sst_dtd.load())
+    ssta_iod_e,ssta_iod_e_norm = ano_norm_t(sst_iod_e.sst_dtd.load())
+    
+    iod_index = ssta_iod_w - ssta_iod_e
+    
+    return ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni,iod_index
+
+
+
 def create_table_event(ssta):
     warm,cold=find_event(ssta,1)    
     data_table_warm = np.vstack((ssta[warm[0,warm[2,:]>=3]].time,
@@ -673,6 +752,7 @@ def plot_anomalies(ssta_atl3,ssta_aba,ssta_nino34,ssta_dni,ssta_cni,ssta_nni):
                      ssta_nni[index_cold[0,i]:index_cold[1,i]],
                              -1,ssta_nni[index_cold[0,i]:index_cold[1,i]]<-1,color='blue')
     ax[5].set_ylim([-4,4])
+    
     
 def plot_anomalies_wk_aba(ssta_aba):
     
