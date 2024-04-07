@@ -4,12 +4,12 @@ on:
   schedule:
 
     - cron: "0 12 * * MON" # everyday monday at 8am
-    - cron: "0 12 * * TUE" # everyday monday at 8am
+    #- cron: "0 12 * * TUE" # everyday monday at 8am
     - cron: "0 12 * * WED" # everyday monday at 8am
-    - cron: "0 12 * * THU" # everyday monday at 8am
+    #- cron: "0 12 * * THU" # everyday monday at 8am
     - cron: "0 12 * * FRI" # everyday monday at 8am
-    - cron: "0 12 * * SAT" # everyday monday at 8am
-    - cron: "0 12 * * SUN" # everyday monday at 8am
+    #- cron: "0 12 * * SAT" # everyday monday at 8am
+    #- cron: "0 12 * * SUN" # everyday monday at 8am
     
 
   push:
