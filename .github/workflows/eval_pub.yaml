@@ -65,7 +65,7 @@ jobs:
           jupyter nbconvert --ExecutePreprocessor.timeout=2000 --execute automatic_time_series_SST.ipynb  --output-dir='./ci_out' --to html
 
       - name: Upload notebook
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: ci_out
