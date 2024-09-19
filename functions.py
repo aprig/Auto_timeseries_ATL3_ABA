@@ -526,8 +526,10 @@ def create_table_event(ssta):
     df_cold["Start date"] = df_cold["Start date"].dt.strftime('%Y-%m')
     df_cold["End date"] = df_cold["End date"].dt.strftime('%Y-%m')
     df_cold['Max SSTa']  = (np.round(np.array(ssta_min_c),2) ) 
-    df_cold['Date max SSTa']  = list(np.array(date_min_c))
-    
+    #df_cold['Date max SSTa']  = list(np.array(date_min_c))
+    print(date_min_c)
+    formatted_dates = [str(date) for date in date_min_c]
+    df_cold['Date max SSTa']  = list(np.array(formatted_dates))
     df_warm["Start date"] = df_warm["Start date"].dt.strftime('%Y-%m')
     df_warm["End date"] = df_warm["End date"].dt.strftime('%Y-%m')
     
@@ -1098,48 +1100,49 @@ def read_data_compute_anomalies_map_ind(path_data):
 
     
 
-
 def plot_wamoi(cmap_data):
-
     ds = xr.open_dataset(cmap_data,engine='pydap')
-    
+
     ds= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
     precip = xr.concat([ds.precip[:, :, 72:], ds.precip[:, :, :72]], dim='lon')
     precip.coords['lon'] = (precip.coords['lon'] + 180) % 360 - 180
-    
-    
-    
+
+    precip = precip.where(precip>-1e36)
+
     precip_NI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
                                (precip.lat<=20) & (precip.lat>=7.5),drop=True)
-    
+
 
     precip_NI = precip_NI.weighted(np.cos(np.deg2rad(precip_NI.lat))).mean(('lon','lat'))
 
-    
+
     precip_SI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
                                (precip.lat<=7.5) & (precip.lat>=0),drop=True)
     precip_SI = precip_SI.weighted(np.cos(np.deg2rad(precip_SI.lat))).mean(('lon','lat'))
-    
-    
+
+
+
     # standardized
     precip_NI_std = precip_NI/precip_NI.std(dim='time')
     precip_SI_std = precip_SI/precip_SI.std(dim='time')
-    
+
     wamoi = precip_NI_std - precip_SI_std
 
     wamoi_clim = np.ones((now.year+1-2000,73))*np.nan
     onset_date = np.ones((now.year+1-2000))*np.nan
+
     k=0
 
     for i in range(2000,now.year+1,1):
+        #print(i)
         try:
-            
+            #print('yes')
             wamoi_clim[k,:] = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
             tmp = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
             index_WAM = xr.full_like(tmp,0)
             index_WAM[tmp >= 0] = 1
             index_tmp = []
-            for j in range(index_WAM.shape[0]-4):
+            for j in range(index_WAM.shape[0]-3):
                 if (index_WAM[j] ==1) & (index_WAM[j+1] ==1) & (index_WAM[j+2] ==1)& (index_WAM[j+3] ==1):
                     index_tmp.append(j)
             try:       
@@ -1149,47 +1152,69 @@ def plot_wamoi(cmap_data):
 
             k+=1
         except ValueError:
+            #print('no')
             test = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            tmp = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            print(test)
             new = np.ones((73))*np.nan
             new[:test.shape[0]] = test
             wamoi_clim[k,:]=new
+            index_WAM = xr.full_like(tmp,0)
+            index_WAM[tmp >= 0] = 1
+            index_tmp = []
+            for j in range(index_WAM.shape[0]-3):
+                if (index_WAM[j] ==1) & (index_WAM[j+1] ==1) & (index_WAM[j+2] ==1)& (index_WAM[j+3] ==1):
+                    index_tmp.append(j)
+            try:       
+                onset_date[k]=index_tmp[0]
+            except IndexError:
+                pass
 
 
-            
-            
-            
-    time = wamoi.sel(time=slice(datetime.datetime(2020, 1, 1),datetime.datetime(2020, 12, 31) ))   
-    
-    
-    f,ax = plt.subplots(2,1,figsize=[15,10])
+
+    f,ax = plt.subplots(3,1,figsize=[15,15])
     ftz=20
     ax=ax.ravel()
-    
-    ax[0].plot(time.time,np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-2021')
-    
-    for i in range(wamoi_clim.shape[0]):
-        ax[0].plot(time.time,wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
-    ax[0].plot(time.time,wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
-    ax[0].legend(fontsize=ftz)
+
+    plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.2
+                        ,
+                        wspace=0.2)
+
+    wamoi_clim_mean = np.nanmean(wamoi_clim,0)
+    ax[0].plot(wamoi.time,wamoi,color='black')
     ax[0].tick_params(labelsize=ftz)
-    #
-    locator = mdates.MonthLocator()  # every month
-    # Specify the format - %b gives us Jan, Feb...
-    fmt = mdates.DateFormatter('%b')
-    ax[0].xaxis.set_major_locator(locator)
-    # Specify formatter
-    ax[0].xaxis.set_major_formatter(fmt)
-    ax[0].set_ylabel('WAMOI',fontsize=ftz,fontweight='bold')
-    ax[0].set_title(str(wamoi.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
-    ax[0].axhline(0,color='black',linestyle='--')
-    
-    xtime = pd.date_range(start='1/1/2000', periods=now.year+1-2000, freq='Y')
-    ax[1].plot(xtime,onset_date,color='black',linewidth=3)
-    ax[1].set_ylabel('Onset date [Pentad num]',fontsize=ftz,fontweight='bold')
-    ax[1].set_xlabel('Year',fontsize=ftz,fontweight='bold')
-    ax[1].tick_params(labelsize=ftz)
-    ax[1].axhline(36,color='grey',label='1st July')
+    ax[0].axhline(0, color='black')
+    ax[0].set_ylabel('WAMOI',fontsize=ftz)
+    ax[0].grid(alpha=0.5)
+
+    ax[1].plot(np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-'+str(now.year))
+
+    for i in range(wamoi_clim.shape[0]):
+        ax[1].plot(wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
+    ax[1].plot(wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
     ax[1].legend(fontsize=ftz)
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].axvline(onset_date[-1],color='red')
+    #
+
+    ax[1].set_ylabel('WAMOI',fontsize=ftz)
+    ax[1].set_title(str(wamoi.time.values[-1])[:7],fontsize=ftz,fontweight='bold')
+    ax[1].axhline(0,color='black',linestyle='--')
+    ax[1].set_xlabel('Pentad',fontsize=ftz)
+    ax[1].grid(alpha=0.5)
+    xtime = pd.date_range(start='1/1/2000', periods=now.year-2000, freq='Y')
+    xtime = np.arange(2000,now.year+1,1)
+    ax[2].plot(xtime,onset_date,color='black',linewidth=3)
+    ax[2].set_ylabel('Onset date [Pentad num]',fontsize=ftz)
+    ax[2].set_xlabel('Year',fontsize=ftz)
+    ax[2].tick_params(labelsize=ftz)
+    ax[2].axhline(36,color='grey',label='1st July')
+    ax[2].legend(fontsize=ftz)
+    ax[2].grid(alpha=0.5)
+
+    ax[2].set_xticks(xtime)
+    ax[2].set_xticklabels(xtime)
+    ax[2].tick_params(axis='x', labelrotation=45)
     
     
     
