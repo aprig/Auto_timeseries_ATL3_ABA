@@ -527,7 +527,7 @@ def create_table_event(ssta):
     df_cold["End date"] = df_cold["End date"].dt.strftime('%Y-%m')
     df_cold['Max SSTa']  = (np.round(np.array(ssta_min_c),2) ) 
     #df_cold['Date max SSTa']  = list(np.array(date_min_c))
-    print(date_min_c)
+    #print(date_min_c)
     formatted_dates = [str(date) for date in date_min_c]
     df_cold['Date max SSTa']  = list(np.array(formatted_dates))
     df_warm["Start date"] = df_warm["Start date"].dt.strftime('%Y-%m')
