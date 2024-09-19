@@ -1155,7 +1155,6 @@ def plot_wamoi(cmap_data):
             #print('no')
             test = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
             tmp = wamoi.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
-            print(test)
             new = np.ones((73))*np.nan
             new[:test.shape[0]] = test
             wamoi_clim[k,:]=new
