@@ -1,7 +1,7 @@
 
 # Author: Arthur Prigent
 # Email: prigent.arthur29@gmail.com
-
+import string
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -484,7 +484,7 @@ def read_data_compute_anomalies_ersstv5_for_mail(path_data):
 
 
 def create_table_event(ssta):
-    warm,cold=find_event(ssta,1)    
+    warm,cold=find_event(ssta,ssta.std(dim='time'))    
     data_table_warm = np.vstack((ssta[warm[0,warm[2,:]>=3]].time,
                            ssta[warm[1,warm[2,:]>=3]].time))
     df_warm = pd.DataFrame(data_table_warm.T, columns = ['Start date','End date'])
@@ -1100,7 +1100,7 @@ def read_data_compute_anomalies_map_ind(path_data):
 
     
 
-def plot_wamoi(cmap_data):
+def plot_wamoi_old(cmap_data):
     ds = xr.open_dataset(cmap_data,engine='pydap')
 
     ds= ds.sel(time=slice(datetime.datetime(1982, 1, 1), now))
@@ -1168,6 +1168,8 @@ def plot_wamoi(cmap_data):
                 onset_date[k]=index_tmp[0]
             except IndexError:
                 pass
+            
+            k+=1
 
 
 
@@ -1215,7 +1217,140 @@ def plot_wamoi(cmap_data):
     ax[2].set_xticklabels(xtime)
     ax[2].tick_params(axis='x', labelrotation=45)
     
+def plot_wamoi(path_data):
+    ds = xr.open_dataset(path_data,engine='pydap')
+
+    ds= ds.sel(time=slice(datetime.datetime(2000, 1, 1), now))
+    precip = xr.concat([ds.precip[:, :, 72:], ds.precip[:, :, :72]], dim='lon')
+    precip.coords['lon'] = (precip.coords['lon'] + 180) % 360 - 180
+
+    precip = precip.where(precip>-1e36)
+
+    precip_NI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
+                               (precip.lat<=20) & (precip.lat>=7.5),drop=True)
+
+
+    precip_NI = precip_NI.weighted(np.cos(np.deg2rad(precip_NI.lat))).mean(('lon','lat'))
+
+
+    precip_SI = precip.where((  precip.lon>=-10) & (precip.lon<=10) &
+                               (precip.lat<=7.5) & (precip.lat>=0),drop=True)
+    precip_SI = precip_SI.weighted(np.cos(np.deg2rad(precip_SI.lat))).mean(('lon','lat'))
+
+
+
+    # standardized
+    precip_NI_std = precip_NI/precip_NI.std(dim='time')
+    precip_SI_std = precip_SI/precip_SI.std(dim='time')
+
+    wamoi = precip_NI_std - precip_SI_std
+
+    wamoi_clim = np.ones((now.year+1-2000,73))*np.nan
+    onset_date = np.ones((now.year+1-2000))*np.nan
+    print(wamoi_clim.shape)
+
+    wamoi_5pm = wamoi.rolling(time=5, center=True).mean()
+
+
+
+    k=0
+
+    for i in range(2000,now.year+1,1):
+
+        try:
+            wamoi_clim[k,:] = wamoi_5pm.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            tmp = wamoi_5pm.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            index_WAM = xr.full_like(tmp,0)
+            index_WAM[tmp >= 0] = 1
+            index_tmp = []
+            for j in range(index_WAM.shape[0]-3):
+                if (index_WAM[j] ==1) & (index_WAM[j+1] ==1) & (index_WAM[j+2] ==1)& (index_WAM[j+3] ==1):
+                    index_tmp.append(j)
+            try:       
+                onset_date[k]=index_tmp[0]
+            except IndexError:
+                pass
+
+            k+=1
+        except ValueError:
+            test = wamoi_5pm.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            tmp = wamoi_5pm.sel(time=slice(datetime.datetime(i, 1, 1),datetime.datetime(i, 12, 31) ))
+            new = np.ones((73))*np.nan
+            new[:test.shape[0]] = test
+            wamoi_clim[k,:]=new
+            index_WAM = xr.full_like(tmp,0)
+            index_WAM[tmp >= 0] = 1
+            index_tmp = []
+            for j in range(index_WAM.shape[0]-3):
+                if (index_WAM[j] ==1) & (index_WAM[j+1] ==1) & (index_WAM[j+2] ==1)& (index_WAM[j+3] ==1):
+                    index_tmp.append(j)
+            try:       
+                onset_date[k]=index_tmp[0]
+            except IndexError:
+                pass
+            k+=1
+
+    f,ax = plt.subplots(3,1,figsize=[15,12])
+    ftz=20
+    ax=ax.ravel()
+
+    plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.4
+                        ,
+                        wspace=0.2)
+
+    wamoi_clim_mean = np.nanmean(wamoi_clim,0)
+    ax[0].plot(wamoi.time,wamoi_5pm,color='black')
+    ax[0].tick_params(labelsize=ftz)
+    ax[0].axhline(0, color='black')
+    ax[0].set_ylabel('WAMOI',fontsize=ftz)
+    ax[0].grid(alpha=0.5)
+    ax[0].set_title('Timeseries of the WAMOI',fontsize=ftz)
+
+    ax[1].plot(np.nanmean(wamoi_clim,0),color='black',linewidth=3,label='Mean 2000-'+str(now.year))
+
+    for i in range(wamoi_clim.shape[0]):
+        ax[1].plot(wamoi_clim[i,:],color='grey',linewidth=1,alpha=0.3)
+    ax[1].plot(wamoi_clim[-1,:],color='red',linewidth=3,label=str(now.year))
+    ax[1].scatter(np.arange(0,wamoi_clim[-1,:].shape[0],1),wamoi_clim[-1,:],color='red',linewidth=3)
+    ax[1].axvline(onset_date[-1],color='red')
     
+    ax[1].plot(wamoi_clim[-2,:],color='blue',linewidth=3,label=str(now.year-1))
+    ax[1].scatter(np.arange(0,wamoi_clim[-2,:].shape[0],1),wamoi_clim[-2,:],color='blue',linewidth=3)
+    ax[1].axvline(onset_date[-2],color='blue')
+    ax[1].legend(fontsize=ftz)
+    #
+    ax[1].tick_params(labelsize=ftz)
+    ax[1].set_ylabel('WAMOI',fontsize=ftz)
+    ax[1].set_title('Seasonal cycles',fontsize=ftz)
+    ax[1].axhline(0,color='black',linestyle='--')
+    ax[1].set_xlabel('Pentad',fontsize=ftz)
+    ax[1].grid(alpha=0.5)
+    #xtime = pd.date_range(start='1/1/2000', periods=now.year-2000, freq='Y')
+    xtime = np.arange(2000,now.year+1,1)
+    ax[2].set_title('Timeseries of the onset dates',fontsize=ftz)
+    ax[2].bar(xtime,onset_date,color='black',linewidth=3)
+    ax[2].bar(now.year,onset_date[-1],color='red')
+    ax[2].bar(now.year-1,onset_date[-2],color='blue')
+    ax[2].bar(2022,onset_date[22],color='grey',alpha=0.5)
+    #ax[2].scatter(xtime,onset_date,color='black',linewidth=3)
+    ax[2].set_ylabel('Onset date [Pentad num]',fontsize=ftz)
+    ax[2].set_xlabel('Year',fontsize=ftz)
+    ax[2].tick_params(labelsize=ftz)
+    ax[2].axhline(36,color='grey',label='1st July')
+    ax[2].legend(fontsize=ftz)
+    ax[2].grid(alpha=0.5)
+
+    ax[2].set_xticks(xtime)
+    ax[2].set_xticklabels(xtime)
+    ax[2].tick_params(axis='x', labelrotation=45)
+    ax[2].set_ylim([30,45])
+
+    ax[0].text(0,
+             1.03,  str(string.ascii_lowercase[0])+')',transform=ax[0].transAxes,size=ftz)
+    ax[1].text(0,
+             1.03,  str(string.ascii_lowercase[1])+')',transform=ax[1].transAxes,size=ftz)
+    ax[2].text(0,
+             1.03,  str(string.ascii_lowercase[2])+')',transform=ax[2].transAxes,size=ftz)
     
 def plot_amm(data_amm):
     df = pd.read_csv(data_amm) 
@@ -1890,7 +2025,7 @@ def plot_IOD(iod_index):
     ax.fill_between(iod_index.time.values,iod_index,-iod_index.std(dim='time'),
                     iod_index<-iod_index.std(dim='time'),color='blue')
     ax.tick_params(labelsize=ftz)
-    ax.set_title('IOD index',fontsize=ftz,fontweight='bold')
+    ax.set_title('IOD index (degC)',fontsize=ftz,fontweight='bold')
     ax.text(0.01,0.04,'Updated '+date_time,transform=ax.transAxes,
            size=ftz,
            weight='bold')
